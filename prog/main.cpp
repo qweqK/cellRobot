@@ -1,6 +1,17 @@
 #include <iostream>
-#include "help.h"
+#include "../syntaxGen/help.h"
+//#include "parser.h"
+#include "parser.hpp"
+#include "game.h"
 
 int main() {
     std::cout << "Hello World!" << std::endl;
+    Game game("test2.txt");
+    game.run();
+    game.printTable();
 }
+
+// void yy::parser::error(const std::string &msg) {
+//     std::cerr << msg << std::endl;
+// }
+

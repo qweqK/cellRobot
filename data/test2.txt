@@ -1,0 +1,20 @@
+func start {
+   signed eq <- 4 + 2;
+   3+1;
+   signed yg <- 5u;
+   signed rq <- eq + 3;
+   testrep (eq) {eq <- eq -1;}
+   unsigned uns <- 6u;
+   const signed cos <- 5;
+   unsigned f <- 4u;
+
+   cell fa <- (down);
+
+   signed celsa <- 4 + fa;
+
+
+}
+
+
+
+

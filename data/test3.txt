@@ -1,0 +1,5 @@
+
+   func start {
+   unsigned f <- 4u;
+   unsigned g <- f;
+   }

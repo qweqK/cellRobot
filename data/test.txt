@@ -1,0 +1,9 @@
+
+func start {
+    signed eq <- 12;
+    eq-2;
+    eq <- 4;
+    eq <- eq+15;
+    6-eq;
+
+}
