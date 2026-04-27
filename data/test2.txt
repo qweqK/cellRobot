@@ -3,18 +3,19 @@ func start {
    3+1;
    signed yg <- 5u;
    signed rq <- eq + 3;
-   testrep (eq) {eq <- eq -1;}
+   testrep (eq) {
+
+   eq <- eq -1;
+   rq <- rq +1;
+   }
    unsigned uns <- 6u;
    const signed cos <- 5;
    unsigned f <- 4u;
 
-   cell fa <- (down);
+   cell fa <- (left, top,right);
 
    signed celsa <- 4 + fa;
-
-
 }
-
 
 
 

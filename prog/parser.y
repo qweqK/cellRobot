@@ -4,7 +4,6 @@
 %defines "parser.hpp"
 %define api.value.type variant
 %define api.namespace {yy}
-%define parse.error verbose
 
 
 %parse-param {Data &data}
@@ -129,9 +128,9 @@ init:
     CONST UNSIGNED VAR ASSIGN expr ';'{ $$ = std::make_unique<InitNode>($3, std::move($5), *data.varstCur, VarType::UNSIGNED, true);}
     |CONST SIGNED VAR ASSIGN  expr ';' {$$ = std::make_unique<InitNode>($3, std::move($5), *data.varstCur,VarType::SIGNED, true);}
     |CONST CELL VAR ASSIGN '(' cellArg ')' ';' {$$ = std::make_unique<InitCellNode>($3, $6, *data.varstCur, true);}
-    | MATRIX SIGNED VAR '(' NUM ',' NUM ')' ';' {}
-    | MATRIX UNSIGNED VAR '(' NUM ',' NUM ')' ';' {}
-    | MATRIX CELL VAR  '(' NUM ',' NUM ')' ';' {}
+    | MATRIX SIGNED VAR '(' UNUM ',' UNUM ')' ';'  {$$ = std::make_unique<InitMatrixNode>($3, $5, $7, VarType::SIGNED, *data.varstCur);}
+    | MATRIX UNSIGNED VAR '(' UNUM ',' UNUM ')' ';' {$$ = std::make_unique<InitMatrixNode>($3, $5, $7, VarType::UNSIGNED, *data.varstCur);}
+    | MATRIX CELL VAR  '(' UNUM ',' UNUM ')' ';' {$$ = std::make_unique<InitMatrixNode>($3, $5, $7, VarType::CELL, *data.varstCur);}
 
     |UNSIGNED VAR ASSIGN expr ';' {$$ = std::make_unique<InitNode>($2, std::move($4), *data.varstCur, VarType::UNSIGNED);}
     |SIGNED VAR ASSIGN expr ';'{ $$ = std::make_unique<InitNode>($2, std::move($4), *data.varstCur,VarType::SIGNED);}

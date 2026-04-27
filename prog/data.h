@@ -7,8 +7,9 @@
 #include <variant>
 #include <vector>
 #include "parser.hpp"
+#include <unordered_map>
 
-enum class VarType {SIGNED=0, UNSIGNED=1, CELL=2, MATRIX=3};
+enum class VarType {SIGNED=1, UNSIGNED=2, CELL=3, MATRIX=4};
 enum class NodeType {VAR_NODE, OPER_NODE, CONST_NODE};
 enum class DIRECT {UP=1, DOWN=2, LEFT=2, RIGHT=3};
 
@@ -47,11 +48,11 @@ public:
         data = {false, false, false, false};
     }
     friend std::ostream& operator << (std::ostream& out,  Cell &rhs) {
-        if (rhs.data[0]) out <<" _"<< std::endl;
+        if (rhs.data[0]) out <<" ___"<< std::endl;
         if (rhs.data[2]) out << "|";
-        out <<  " ";
+        out <<  "   ";
         if (rhs.data[3]) out << "|" <<std::endl;
-        if (rhs.data[1]) out << " ‾";
+        if (rhs.data[1]) out << " ‾‾‾";
         return out;
     };
 };
@@ -60,7 +61,27 @@ public:
 class Matrix {
 public:
     VarType t;
-    std::vector<std::vector<std::variant<int, unsigned int, Cell>>> mat;
+    unsigned int rows;
+    unsigned int cols;
+    using val = std::variant<int, unsigned int, Cell>;
+    std::vector<val> mat;
+    Matrix(VarType t, unsigned int h, unsigned int v) : t(t), rows(h), cols(v) {
+        if (t == VarType::SIGNED) {
+            mat = std::vector<val>(rows * cols, 0);
+        }
+        else if (t == VarType::UNSIGNED) {
+            mat = std::vector<val>(rows * cols, 0u);
+        }
+        else if (t == VarType::CELL) {
+            mat = std::vector<val>(rows * cols, Cell());
+        }
+
+    };
+
+    val& operator () (unsigned int r, unsigned int c) {
+        return mat[r * cols + c];
+    }
+
     Matrix operator +(Matrix&r) {
         return r;
     }
@@ -69,7 +90,7 @@ public:
 
 class Value {
     public:
-    std::variant<int, unsigned int,Cell, Matrix> s;
+    std::variant<std::monostate, int, unsigned int,Cell, Matrix> s;
     VarType type;
     Value(int i) : s(i), type(VarType::SIGNED){}
     Value(unsigned int i) : s(i), type(VarType::UNSIGNED){}
@@ -125,7 +146,7 @@ class LiterNode : public VlueTypeNode {
             //case VarType::MATRIX: std::cout << std::get<Matrix>(value.s); break;
         }
     }
-    LiterNode(Value  value, VarType tt) : value(std::move(value)), t(tt)  { if (t==VarType::SIGNED) std::cout << "si";else std::cout << "un"; std::cout << std::endl;}
+    LiterNode(Value  value, VarType tt) : value(std::move(value)), t(tt)  {}
     Value proc() override{return value;}
 };
 
@@ -491,7 +512,7 @@ public:
             varst[name] = {0, isConst};
         }
         else if ( t == VarType::UNSIGNED && rightn -> getValType() != VarType::UNSIGNED) {
-            std::cout << "tupost" << std::endl;
+
             rightn = std::make_unique<SignedToUnsign>(std::move(rightn));
         }
 
@@ -506,7 +527,6 @@ public:
     }
     Value proc() override {
         auto r =  right->proc();
-        std::cout << r.s.index() << std::endl;
         varst[name] = {std::move(r), isConst};
         return 0;
     };
@@ -543,7 +563,20 @@ class InitCellNode : public Node {
 };
 
 class InitMatrixNode : public Node {
-
+    VarType t;
+    unsigned int h;
+    unsigned int v;
+    std::unordered_map<std::string, SIT> &varst;
+    std::string name;
+public:
+    InitMatrixNode(std::string s, unsigned int h,unsigned int v, VarType tt,std::unordered_map<std::string, SIT> &varstr ) : t(tt), h(h), v(v), varst(varstr), name(std::move(s)) {
+        if (t == VarType::MATRIX) {throw std::invalid_argument("Matrix type not supported");}
+        if (varst.contains(name)) throw std::invalid_argument("Variable name already exists");
+        varst[name] = {Matrix(t, h, v)};
+    }
+    Value proc() override {
+        return 0;
+    }
 };
 
 
@@ -561,7 +594,7 @@ class XrayNode : public VlueTypeNode {
     void setValType(VarType tt) override { t =tt; }
     XrayNode(Robot &r, GameMap &m) : VlueTypeNode(), rb(r), map(m), t(VarType::MATRIX) {}
     Value proc() override {
-      return Matrix();
+      return Matrix(VarType::CELL, 3, 33);
     };
 };
 
@@ -649,6 +682,7 @@ class Function {
 
 class Data {
 public:
+
     std::unordered_map<std::string, Function> functions;
     std::unique_ptr<std::unordered_map<std::string, SIT>> varstCur;
     Data() :  varstCur(std::make_unique<std::unordered_map<std::string, SIT>>()) {}

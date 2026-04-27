@@ -4,6 +4,7 @@ extern FILE* yyin;
 void Game::run() {
    yyin = fopen(filename.c_str(), "r");
    parser.parse();
+   fclose(yyin);
 }
 
 void Game::printTable() {
@@ -23,3 +24,4 @@ void Game::printTable() {
       std::cout << "}" << std::endl;
    }
 }
+
