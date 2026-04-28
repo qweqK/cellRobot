@@ -44,7 +44,10 @@
 %left '+' '-'
 %left GE LE EQ NE '>' '<'
 %left '*' '/' '%'
+%nonassoc VAR
 %nonassoc UMINUS
+%left ')' '('
+%right ASSIGN
 
 %%
 
@@ -89,8 +92,9 @@ sent:
      | BOTTOM ';' {}
      | LEFT ';' {}
      | RIGHT ';' {}
-     | CALL VAR '(' vars ')' ';'
+     | CALL VAR '(' vars ')' ';' {}
      | VAR ASSIGN expr ';'{$$ = make_unique<AssignNode>($1, std::move($3), *data.varstCur);}
+     | VAR '('UNUM ',' UNUM ')' ASSIGN expr {}
      ;
 
 
@@ -111,6 +115,7 @@ expr:
     NUM {$$=std::make_unique<LiterNode>($1, VarType::SIGNED); }
     | UNUM {$$ =  std::make_unique<LiterNode>($1, VarType::UNSIGNED);}
     | XRAY {}
+    | VAR '('UNUM ',' UNUM ')' {}
     | '-'expr %prec UMINUS {$$ = std::make_unique<UminusNode>(std::move($2));}
     | VAR {$$ = std::make_unique<VarNode>($1, *data.varstCur);}
     | expr '+' expr { $$ = std::make_unique<PlusNode>(std::move($1),std::move($3)); }
@@ -168,7 +173,7 @@ cellArg:
       $$ = std::move($1);
     }
 
-    |
+
 
 noWall:
     NTOP { $$ = 0;}

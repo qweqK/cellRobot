@@ -464,231 +464,227 @@ public:
     GreaterNode(std::unique_ptr<VlueTypeNode> leftn, std::unique_ptr<VlueTypeNode> rightn) : ArithNode(std::move(leftn), std::move(rightn)) {}
     void print() override{left->print();std::cout << ">" << std::endl; right->print();}
 
-};
-
-class LessNode : public ArithNode {
-public:
-
-    LessNode(std::unique_ptr<VlueTypeNode> leftn, std::unique_ptr<VlueTypeNode> rightn) : ArithNode(std::move(leftn), std::move(rightn)) {}
-    void print() override{left->print();std::cout << "<" << std::endl; right->print();}
-
-};
-
-class EqNode : public ArithNode {
-public:
-    EqNode(std::unique_ptr<VlueTypeNode> leftn, std::unique_ptr<VlueTypeNode> rightn) : ArithNode(std::move(leftn), std::move(rightn)) {}
-    void print() override{left->print();std::cout << "=" << std::endl; right->print();}
-
-};
-
-class EndSentNode : public Node {
-    std::unique_ptr<Node> left;
-    std::unique_ptr<Node> right;
-    public:
-    EndSentNode(std::unique_ptr<Node>  leftn, std::unique_ptr<Node> rightn ) : left(std::move(leftn)), right(std::move(rightn)) {}
-    Value proc() override {
-        left->proc(); return right->proc();
-    }
-    void print() override{left->print();std::cout << ";" << std::endl; right->print();}
-
-};
-
-
-
-
-class InitNode : public Node {
-    std::unordered_map<std::string, SIT> &varst;
-    VarType t;
-    std::unique_ptr<VlueTypeNode> right;
-    std::string name;
-    bool isConst;
-
-public:
-    InitNode(std::string var, std::unique_ptr<VlueTypeNode> rightn,  std::unordered_map<std::string, SIT> &vars, VarType tt,bool isConst=false) : varst(vars), t(tt), name(std::move(var)), isConst(isConst) {
-        if (varst.contains(name)) throw std::invalid_argument("Variable name already exists");
-        if (rightn->getValType() == VarType::MATRIX || rightn->getValType() == VarType::CELL) {/*error*/}
-        if ( t == VarType::SIGNED && rightn->getValType() != VarType::SIGNED) {
-            rightn = std::make_unique<UnsignToSigned>(std::move(rightn));
-            varst[name] = {0, isConst};
-        }
-        else if ( t == VarType::UNSIGNED && rightn -> getValType() != VarType::UNSIGNED) {
-
-            rightn = std::make_unique<SignedToUnsign>(std::move(rightn));
-        }
-
-        if (rightn->getValType() == VarType::UNSIGNED) {
-            varst[name] = {0u, isConst};
-        }
-        else if (rightn->getValType() == VarType::SIGNED) {
-            varst[name] = {0, isConst};
-        }
-
-        right = std::move(rightn);
-    }
-    Value proc() override {
-        auto r =  right->proc();
-        varst[name] = {std::move(r), isConst};
-        return 0;
     };
-    void print() override{std::cout << name << "<-"; right->print();}
 
-};
-
-
-
-
-class InitCellNode : public Node {
-    std::string name;
-    std::unordered_map<std::string, SIT> &varst;
-    VarType t;
-    std::vector<bool> walls;
-    bool isConst;
-
-
-
+    class LessNode : public ArithNode {
     public:
 
-    InitCellNode(std::string s, std::vector<std::pair<bool, bool>> v, std::unordered_map<std::string, SIT> &vars,bool isConst=false ) : name(std::move(s)), varst(vars), t(VarType::CELL), isConst(isConst) {
-        if (varst.contains(name)) throw std::invalid_argument("Variable name already exists");
-        walls = {v[0].first, v[1].first, v[2].first, v[3].first};
-        varst[name] = {Cell(walls[0], walls[1], walls[2], walls[3]), isConst};
-    }
-    Value proc() override {return 0;};
-    void print() override {
-        std::cout << name << "<-";
-        std::cout<< walls[0] <<"|"<<walls[1]<< "|"<<walls[2] << "|" << walls[3];
-    }
+        LessNode(std::unique_ptr<VlueTypeNode> leftn, std::unique_ptr<VlueTypeNode> rightn) : ArithNode(std::move(leftn), std::move(rightn)) {}
+        void print() override{left->print();std::cout << "<" << std::endl; right->print();}
 
-
-};
-
-class InitMatrixNode : public Node {
-    VarType t;
-    unsigned int h;
-    unsigned int v;
-    std::unordered_map<std::string, SIT> &varst;
-    std::string name;
-public:
-    InitMatrixNode(std::string s, unsigned int h,unsigned int v, VarType tt,std::unordered_map<std::string, SIT> &varstr ) : t(tt), h(h), v(v), varst(varstr), name(std::move(s)) {
-        if (t == VarType::MATRIX) {throw std::invalid_argument("Matrix type not supported");}
-        if (varst.contains(name)) throw std::invalid_argument("Variable name already exists");
-        varst[name] = {Matrix(t, h, v)};
-    }
-    Value proc() override {
-        return 0;
-    }
-};
-
-
-
-
-
-
-
-class XrayNode : public VlueTypeNode {
-    Robot &rb;
-    GameMap &map;
-    VarType t;
-    public:
-    VarType getValType() override { return t; }
-    void setValType(VarType tt) override { t =tt; }
-    XrayNode(Robot &r, GameMap &m) : VlueTypeNode(), rb(r), map(m), t(VarType::MATRIX) {}
-    Value proc() override {
-      return Matrix(VarType::CELL, 3, 33);
     };
-};
 
-class MoveNode : public Node {
+    class EqNode : public ArithNode {
+    public:
+        EqNode(std::unique_ptr<VlueTypeNode> leftn, std::unique_ptr<VlueTypeNode> rightn) : ArithNode(std::move(leftn), std::move(rightn)) {}
+        void print() override{left->print();std::cout << "=" << std::endl; right->print();}
 
-};
+    };
 
-class AssignNode : public Node {
-    std::unique_ptr<VlueTypeNode> expr;
-    std::unordered_map<std::string, SIT>& varst;
-    std::string var;
 
-public:
-    AssignNode(std::string varr, std::unique_ptr<VlueTypeNode> exprs, std::unordered_map<std::string, SIT> &vars) : var(std::move(varr)), varst(vars){
-        if (varst.contains(var)) {
-            if (!varst[var].isConst) {
-                expr = std::move(exprs);
+    class EndSentNode : public Node {
+        std::unique_ptr<Node> left;
+        std::unique_ptr<Node> right;
+    public:
+        EndSentNode(std::unique_ptr<Node>  leftn, std::unique_ptr<Node> rightn ) : left(std::move(leftn)), right(std::move(rightn)) {}
+        Value proc() override {
+            left->proc(); return right->proc();
+        }
+        void print() override{left->print();std::cout << ";" << std::endl; right->print();}
+
+    };
+
+
+
+    class InitNode : public Node {
+        std::unordered_map<std::string, SIT> &varst;
+        VarType t;
+        std::unique_ptr<VlueTypeNode> right;
+        std::string name;
+        bool isConst;
+
+    public:
+        InitNode(std::string var, std::unique_ptr<VlueTypeNode> rightn,  std::unordered_map<std::string, SIT> &vars, VarType tt,bool isConst=false) : varst(vars), t(tt), name(std::move(var)), isConst(isConst) {
+            if (varst.contains(name)) throw std::invalid_argument("Variable name already exists");
+            if (rightn->getValType() == VarType::MATRIX || rightn->getValType() == VarType::CELL) {/*error*/}
+            if ( t == VarType::SIGNED && rightn->getValType() != VarType::SIGNED) {
+                rightn = std::make_unique<UnsignToSigned>(std::move(rightn));
+                varst[name] = {0, isConst};
+            }
+            else if ( t == VarType::UNSIGNED && rightn -> getValType() != VarType::UNSIGNED) {
+
+                rightn = std::make_unique<SignedToUnsign>(std::move(rightn));
+            }
+
+            if (rightn->getValType() == VarType::UNSIGNED) {
+                varst[name] = {0u, isConst};
+            }
+            else if (rightn->getValType() == VarType::SIGNED) {
+                varst[name] = {0, isConst};
+            }
+
+            right = std::move(rightn);
+        }
+        Value proc() override {
+            auto r =  right->proc();
+            varst[name] = {std::move(r), isConst};
+            return 0;
+        };
+        void print() override{std::cout << name << "<-"; right->print();}
+
+    };
+
+
+
+
+    class InitCellNode : public Node {
+        std::string name;
+        std::unordered_map<std::string, SIT> &varst;
+        VarType t;
+        std::vector<bool> walls;
+        bool isConst;
+
+
+
+    public:
+
+        InitCellNode(std::string s, std::vector<std::pair<bool, bool>> v, std::unordered_map<std::string, SIT> &vars,bool isConst=false ) : name(std::move(s)), varst(vars), t(VarType::CELL), isConst(isConst) {
+            if (varst.contains(name)) throw std::invalid_argument("Variable name already exists");
+            walls = {v[0].first, v[1].first, v[2].first, v[3].first};
+            varst[name] = {Cell(walls[0], walls[1], walls[2], walls[3]), isConst};
+        }
+        Value proc() override {return 0;};
+        void print() override {
+            std::cout << name << "<-";
+            std::cout<< walls[0] <<"|"<<walls[1]<< "|"<<walls[2] << "|" << walls[3];
+        }
+
+
+    };
+
+    class InitMatrixNode : public Node {
+        VarType t;
+        unsigned int h;
+        unsigned int v;
+        std::unordered_map<std::string, SIT> &varst;
+        std::string name;
+    public:
+        InitMatrixNode(std::string s, unsigned int h,unsigned int v, VarType tt,std::unordered_map<std::string, SIT> &varstr ) : t(tt), h(h), v(v), varst(varstr), name(std::move(s)) {
+            if (t == VarType::MATRIX) {throw std::invalid_argument("Matrix type not supported");}
+            if (varst.contains(name)) throw std::invalid_argument("Variable name already exists");
+            varst[name] = {Matrix(t, h, v)};
+        }
+        Value proc() override {
+            return 0;
+        }
+    };
+
+
+
+
+
+
+
+    class XrayNode : public VlueTypeNode {
+        Robot &rb;
+        GameMap &map;
+        VarType t;
+    public:
+        VarType getValType() override { return t; }
+        void setValType(VarType tt) override { t =tt; }
+        XrayNode(Robot &r, GameMap &m) : VlueTypeNode(), rb(r), map(m), t(VarType::MATRIX) {}
+        Value proc() override {
+            return Matrix(VarType::CELL, 3, 33);
+        };
+    };
+
+    class MoveNode : public Node {
+
+    };
+
+    class AssignNode : public Node {
+        std::unique_ptr<VlueTypeNode> expr;
+        std::unordered_map<std::string, SIT>& varst;
+        std::string var;
+
+    public:
+        AssignNode(std::string varr, std::unique_ptr<VlueTypeNode> exprs, std::unordered_map<std::string, SIT> &vars) : var(std::move(varr)), varst(vars){
+            if (varst.contains(var)) {
+                if (!varst[var].isConst) {
+                    expr = std::move(exprs);
+                }
+            }
+            else {throw std::runtime_error("it const");}
+        }
+        Value proc() override {
+            varst[var] = {expr->proc(), false}; return 0;
+        }
+        void print() override {std::cout << var<< " <- "; expr->print();}
+    };
+
+
+
+    class TestRepNode : public Node {
+        std::unique_ptr<VlueTypeNode> left;
+        std::unique_ptr<Node> right;
+    public:
+        TestRepNode(std::unique_ptr<VlueTypeNode>  leftn, std::unique_ptr<Node> rightn) : right(std::move(rightn)) {
+            if (leftn->getValType() != VarType::UNSIGNED || leftn->getValType() != VarType::SIGNED) {/* error */}
+            left =  std::move(leftn);
+        }
+        Value proc() override {
+            while (std::get<int>(left->proc().s)) {right->proc();}
+            return 0;
+        }
+        void print() override {std::cout << "while("; left->print(); std::cout << ") {" << std::endl; right->print(); std::cout <<  std::endl << "}" << std::endl;};
+
+    };
+
+
+
+    class TestOnceNode: public Node {
+        std::unique_ptr<VlueTypeNode> left;
+        std::unique_ptr<Node> right;
+    public:
+        TestOnceNode(std::unique_ptr<VlueTypeNode> leftn, std::unique_ptr<Node> rightn) : right(std::move(rightn)) {
+            if (leftn->getValType() != VarType::UNSIGNED || leftn->getValType() != VarType::SIGNED) {
+                left = std::move(leftn);
             }
         }
-        else {throw std::runtime_error("its const");}
-    }
-    Value proc() override {
-        varst[var] = {expr->proc(), false}; return 0;
-    }
-    void print() override {std::cout << var<< " <- "; expr->print();}
-};
-
-
-
-class TestRepNode : public Node {
-    std::unique_ptr<VlueTypeNode> left;
-    std::unique_ptr<Node> right;
-    public:
-    TestRepNode(std::unique_ptr<VlueTypeNode>  leftn, std::unique_ptr<Node> rightn) : right(std::move(rightn)) {
-        if (leftn->getValType() != VarType::UNSIGNED || leftn->getValType() != VarType::SIGNED) {/* error */}
-        left =  std::move(leftn);
-    }
-    Value proc() override {
-        while (std::get<int>(left->proc().s)) {right->proc();}
-        return 0;
-    }
-    void print() override {std::cout << "while("; left->print(); std::cout << ") {" << std::endl; right->print(); std::cout <<  std::endl << "}" << std::endl;};
-
-};
-
-
-
-class TestOnceNode: public Node {
-    std::unique_ptr<VlueTypeNode> left;
-    std::unique_ptr<Node> right;
-    public:
-    TestOnceNode(std::unique_ptr<VlueTypeNode> leftn, std::unique_ptr<Node> rightn) : right(std::move(rightn)) {
-        if (leftn->getValType() != VarType::UNSIGNED || leftn->getValType() != VarType::SIGNED) {
-            left = std::move(leftn);
+        Value proc() override {
+            if (std::get<int>(left->proc().s)) {right->proc();}
+            return 0;
         }
-    }
-    Value proc() override {
-        if (std::get<int>(left->proc().s)) {right->proc();}
-        return 0;
-    }
-    void print() override {std::cout << "if("; left->print(); std::cout << ") {" << std::endl; right->print(); std::cout << std::endl << "}" << std::endl;};
+        void print() override {std::cout << "if("; left->print(); std::cout << ") {" << std::endl; right->print(); std::cout << std::endl << "}" << std::endl;};
 
-};
+    };
 
-class CallFunctionNode : public Node {
+    class CallFunctionNode : public Node {
 
-};
+    };
 
 
-class EmptyNode : public Node {
-    Value proc() override {return 0;}
-    void print() override {std::cout << "null" << std::endl;}
-};
+    class EmptyNode : public Node {
+        Value proc() override {return 0;}
+        void print() override {std::cout << "null" << std::endl;}
+    };
 
 
 
 
-class Function {
+    class Function {
     public:
-    std::unique_ptr<std::unordered_map<std::string, SIT>> varst;
-    std::unique_ptr<Node> root;
-    Function() = default;
-    Function(std::unique_ptr<std::unordered_map<std::string, SIT>> vars, std::unique_ptr<Node> r) : varst(std::move(vars)), root(std::move(r)) {}
-};
+        std::unique_ptr<std::unordered_map<std::string, SIT>> varst;
+        std::unique_ptr<Node> root;
+        Function() = default;
+        Function(std::unique_ptr<std::unordered_map<std::string, SIT>> vars, std::unique_ptr<Node> r) : varst(std::move(vars)), root(std::move(r)) {}
+    };
 
-class Data {
-public:
+    class Data {
+    public:
 
-    std::unordered_map<std::string, Function> functions;
-    std::unique_ptr<std::unordered_map<std::string, SIT>> varstCur;
-    Data() :  varstCur(std::make_unique<std::unordered_map<std::string, SIT>>()) {}
+        std::unordered_map<std::string, Function> functions;
+        std::unique_ptr<std::unordered_map<std::string, SIT>> varstCur;
+        Data() :  varstCur(std::make_unique<std::unordered_map<std::string, SIT>>()) {}
 
-};
-
-
-
-
+    };

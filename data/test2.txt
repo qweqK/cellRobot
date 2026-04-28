@@ -17,5 +17,7 @@ func start {
    signed celsa <- 4 + fa;
 }
 
+   eq <- f;
+
 
 
