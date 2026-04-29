@@ -13,6 +13,14 @@
     extern int yylineno;
     #include <string>
     #include <iostream>
+    #include "arithNodes.h"
+    #include "assignNodes.h"
+    #include "baseNodes.h"
+    #include "castPrekols.h"
+    #include "differentNodes.h"
+    #include "diffValues.h"
+    #include "init.h"
+    #include "robotActionNodes.h"
     void error(const std::string &msg);
 
 
@@ -64,21 +72,30 @@ start:
     ;
 
 function:
-    FUNC VAR '{'sentces'}' {
-    data.functions.emplace($2, Function(std::move(data.varstCur), std::move($4))) ;
+    FUNC VAR '('params')' '{'sentces'}' {
+    data.functions.emplace($2, Function(std::move(data.varstCur), std::move($7)));
     data.varstCur = std::make_unique<std::unordered_map<std::string, SIT>>();
     std::cout << "dat" << std::endl;
     }
 
 
- /*
+
 params:
-    | param
-    | params ',' param
+
+    | param {}
+    | params ',' param {}
     ;
 param:
+    SIGNED VAR {data.}
+    |UNSIGNED VAR {}
+    |MATRIX CELL VAR {}
+    |MATRIX SIGNED VAR {}
+    |MATRIX UNSIGNED VAR {}
+    |CELL VAR {}
+    |CONST SIGNED VAR {}
+    |CONST UNSIGNED VAR {}
+    ;
 
-*/
 
 
 sent:
@@ -92,9 +109,8 @@ sent:
      | BOTTOM ';' {}
      | LEFT ';' {}
      | RIGHT ';' {}
-     | CALL VAR '(' vars ')' ';' {}
      | VAR ASSIGN expr ';'{$$ = make_unique<AssignNode>($1, std::move($3), *data.varstCur);}
-     | VAR '('UNUM ',' UNUM ')' ASSIGN expr {}
+     | VAR '('expr ',' expr ')' ASSIGN expr {$$ = std::make_unique<MatrixAccesNode>($1, *data.varstCur,std::move($8) ,std::move($3), std::move($5));}
      ;
 
 
@@ -106,16 +122,11 @@ sentces:
     ;
 
 
-vars:
-    VAR
-    | vars VAR
-    ;
-
 expr:
     NUM {$$=std::make_unique<LiterNode>($1, VarType::SIGNED); }
     | UNUM {$$ =  std::make_unique<LiterNode>($1, VarType::UNSIGNED);}
     | XRAY {}
-    | VAR '('UNUM ',' UNUM ')' {}
+    | VAR '('expr ',' expr ')' {$$ = std::make_unique<MatrixAssignAccesNode>($1, *data.varstCur, std::move($3), std::move($5));}
     | '-'expr %prec UMINUS {$$ = std::make_unique<UminusNode>(std::move($2));}
     | VAR {$$ = std::make_unique<VarNode>($1, *data.varstCur);}
     | expr '+' expr { $$ = std::make_unique<PlusNode>(std::move($1),std::move($3)); }
@@ -127,15 +138,22 @@ expr:
     | expr '<' expr { /*$$ = ($1 < $3);*/}
     | expr '>' expr {}
     | expr EQ expr {}
+    | CALL VAR '(' varsc ')' {}
+    | CALL VAR '(' ')' {}
     ;
+
+    varsc:
+        VAR {}
+        | varsc  VAR {}
+
 
 init:
     CONST UNSIGNED VAR ASSIGN expr ';'{ $$ = std::make_unique<InitNode>($3, std::move($5), *data.varstCur, VarType::UNSIGNED, true);}
     |CONST SIGNED VAR ASSIGN  expr ';' {$$ = std::make_unique<InitNode>($3, std::move($5), *data.varstCur,VarType::SIGNED, true);}
     |CONST CELL VAR ASSIGN '(' cellArg ')' ';' {$$ = std::make_unique<InitCellNode>($3, $6, *data.varstCur, true);}
-    | MATRIX SIGNED VAR '(' UNUM ',' UNUM ')' ';'  {$$ = std::make_unique<InitMatrixNode>($3, $5, $7, VarType::SIGNED, *data.varstCur);}
-    | MATRIX UNSIGNED VAR '(' UNUM ',' UNUM ')' ';' {$$ = std::make_unique<InitMatrixNode>($3, $5, $7, VarType::UNSIGNED, *data.varstCur);}
-    | MATRIX CELL VAR  '(' UNUM ',' UNUM ')' ';' {$$ = std::make_unique<InitMatrixNode>($3, $5, $7, VarType::CELL, *data.varstCur);}
+    | MATRIX SIGNED VAR '(' expr ',' expr ')' ';'  {$$ = std::make_unique<InitMatrixNode>($3, std::move($5), std::move($7), VarType::SIGNED, *data.varstCur);}
+    | MATRIX UNSIGNED VAR '(' expr ',' expr ')' ';' {$$ = std::make_unique<InitMatrixNode>($3, std::move($5), std::move($7), VarType::UNSIGNED, *data.varstCur);}
+    | MATRIX CELL VAR  '(' expr ',' expr ')' ';' {$$ = std::make_unique<InitMatrixNode>($3, std::move($5), std::move($7), VarType::CELL, *data.varstCur);}
 
     |UNSIGNED VAR ASSIGN expr ';' {$$ = std::make_unique<InitNode>($2, std::move($4), *data.varstCur, VarType::UNSIGNED);}
     |SIGNED VAR ASSIGN expr ';'{ $$ = std::make_unique<InitNode>($2, std::move($4), *data.varstCur,VarType::SIGNED);}

@@ -12,12 +12,11 @@ func start {
    const signed cos <- 5;
    unsigned f <- 4u;
 
-   cell fa <- (left, top,right);
+   cell fa <- (left, top,right, down);
 
    signed celsa <- 4 + fa;
 }
 
-   eq <- f;
 
 
 

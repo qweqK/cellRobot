@@ -16,6 +16,7 @@ void Game::printTable() {
             case VarType::SIGNED: std::cout << std::get<int>(q.second.value.s) << " -SIGNED";  break;
             case VarType::UNSIGNED: std::cout << std::get<unsigned int>(q.second.value.s) << " -UNSIGNED"; break;
             case VarType::CELL: std::cout <<std::endl << std::get<Cell>(q.second.value.s) << std::endl << " -CELL"; break;
+            case VarType::MATRIX: std::cout <<std::endl << std::get<Matrix>(q.second.value.s) << std::endl << " -MATRIX"; break;
 
          }
          if (q.second.isConst) { std::cout << " |const" << std::endl; }
