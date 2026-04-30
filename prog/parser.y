@@ -47,8 +47,9 @@
 %type <int> noWall
 %type <int> yesWall
 %type <std::vector<std::pair<bool, bool>>> cellArg
-
-
+%type <TSC> params
+%type <std::pair<std::string, SIT>> param
+%type <std::pair<std::string, TSC>>  preFunc
 %left '+' '-'
 %left GE LE EQ NE '>' '<'
 %left '*' '/' '%'
@@ -60,40 +61,40 @@
 %%
 
 start:
-    start function {
-    if(data.functions.contains("start")) {
-        data.functions["start"].root->print();
-        data.functions["start"].root->proc();
-    }
-    std::cout << "f" << std::endl;
-    }
-
-    | {std::cout << "fq" << std::endl;}
+    prog YYEOF {data.interpritation();}
+    ;
+prog:
+    prog function {}
+    |prog init {}
+    |
     ;
 
-function:
-    FUNC VAR '('params')' '{'sentces'}' {
-    data.functions.emplace($2, Function(std::move(data.varstCur), std::move($7)));
-    data.varstCur = std::make_unique<std::unordered_map<std::string, SIT>>();
-    std::cout << "dat" << std::endl;
-    }
 
+function:
+    preFunc '{'sentces'}' {
+    data.fStore.emplace($1.first, Function(std::move($1.second)), std::move($3)));
+    data.buildStorage.pop_back();
+    }
+    ;
+preFunc:
+     FUNC VAR '('params')' {}
 
 
 params:
-
-    | param {}
-    | params ',' param {}
+     param {$$.emplace($1);}
+    | params ',' param {$$.emplace($3);}
+    | {}
     ;
 param:
-    SIGNED VAR {data.}
-    |UNSIGNED VAR {}
-    |MATRIX CELL VAR {}
-    |MATRIX SIGNED VAR {}
-    |MATRIX UNSIGNED VAR {}
-    |CELL VAR {}
-    |CONST SIGNED VAR {}
-    |CONST UNSIGNED VAR {}
+    SIGNED VAR {$$  = std::make_pair<$2, SIT(0, false)>;}
+    |UNSIGNED VAR {$$  = std::make_pair<$2, SIT(0u, false)>;}
+    |MATRIX CELL VAR {$$  = std::make_pair<$3, SIT(Matrix(VarType::SIGNED, 0, 0), false)>;}
+    |MATRIX SIGNED VAR {$$  = std::make_pair<$3, SIT(Matrix(VarType::UNSIGNED, 0, 0), false)>;}
+    |MATRIX UNSIGNED VAR {$$  = std::make_pair<$3, SIT(Matrix(VarType::CELL, 0, 0), false)>;}
+    |CELL VAR {$$  = std::make_pair<$2, SIT(Cell(), true)>;}
+    |CONST SIGNED VAR {$$  = std::make_pair<$3, SIT(0, true)>;}
+    |CONST UNSIGNED VAR {$$  = std::make_pair<$3, SIT(0u, true)>;}
+    |CONST CELL VAR {$$  = std::make_pair<$3, SIT(Cell(), true)>;}
     ;
 
 
@@ -104,7 +105,7 @@ sent:
      | init {$$ = std::move($1);}
      |TESTREP '(' expr ')' sent {$$ = make_unique<TestRepNode>(std::move($3), std::move($5));}
      | TESTONCE '(' expr ')' sent {$$ = make_unique<TestOnceNode>(std::move($3), std::move($5));}
-     | '{' sentces '}' {$$ = std::move($2); }
+     | '{' sentces '}' {$$ = std::move($2); data.buildStorage.pop_back();}
      | TOP ';' {}
      | BOTTOM ';' {}
      | LEFT ';' {}
@@ -117,9 +118,9 @@ sent:
 
 
 sentces:
-     sent { if(!$1) std::cout << "nullptr sent" <<std::endl; $$ = std::move($1);}
-     |sentces sent { if(!$1 || !$2) std::cout << "nullptr sents" <<std::endl ;$$ = make_unique<EndSentNode>(std::move($1), std::move($2));}
-    ;
+     sent { $$ = std::move($1); data.buildStorage.emplace_back(); }
+     |sentces sent {  $$ = make_unique<EndSentNode>(std::move($1), std::move($2));}
+     ;
 
 
 expr:
@@ -204,9 +205,6 @@ yesWall:
     | DOWN {$$ = 1;}
     | LEFT {$$ = 2;}
     | RIGHT {$$ = 3;}
-
-//asg:
-   //VAR  ASSIGN expr ';' {}
 
 
 

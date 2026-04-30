@@ -1,9 +1,10 @@
 
-   func start {
-       matrix signed pop(3-1, 3);
-       pop(1,1) <-2;
-
-        cell io <- (top);
-        io <- pop(1,1);
+   func start() {
+       matrix cell pop(3-1, 3);
+       pop(1,1) <- 2;
+       pop (1,2) <- 3;
+       pop(2,1) <- 3;
+       cell io <- (top);
+       io <- pop(1,1);
 
    }

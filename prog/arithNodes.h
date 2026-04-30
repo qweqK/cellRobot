@@ -10,15 +10,22 @@ public:
     std::unique_ptr<Node> left;
     std::unique_ptr<Node> right;
     ArithNode( std::unique_ptr<VlueTypeNode> leftn, std::unique_ptr<VlueTypeNode> rightn )  {
-        if (leftn->getValType() != rightn->getValType()) {
-            if (leftn->getValType()== VarType::MATRIX || rightn->getValType()== VarType::MATRIX) { }
+        if (leftn->getValType() == VarType::DEFAULT || rightn->getValType() == VarType::DEFAULT) {
+            t= VarType::DEFAULT;
+            left = std::move(leftn);
+            right = std::move(rightn);
+        }
+        else {
+            if (leftn->getValType() != rightn->getValType()) {
+                if (leftn->getValType()== VarType::MATRIX || rightn->getValType()== VarType::MATRIX) { /* osibka */ }
                 TypeCaster tk(leftn->getValType(), std::move(rightn));
                 rightn= std::move(tk.cast());
 
-        }
+            }
             t= leftn->getValType();
             left = std::move(leftn);
             right = std::move(rightn);
+        }
     }
 };
 
@@ -30,7 +37,7 @@ class PlusNode : public ArithNode {
     Value proc() override {
         auto l = left->proc();
         auto r = right->proc();
-
+        if (l.type != r.type) {l.runtimeCaster(r);}
         if (l.type == VarType::SIGNED) {
             return std::get<int>(l.s) + std::get<int>(r.s);
         }
@@ -59,6 +66,7 @@ class MinusNode : public ArithNode {
     Value proc() override {
         auto l = left->proc();
         auto r = right->proc();
+        if (l.type != r.type) {l.runtimeCaster(r);}
         if (l.type == VarType::SIGNED) {
             return std::get<int>(l.s) - std::get<int>(r.s);
         }
@@ -102,6 +110,7 @@ public:
     Value proc() override {
         auto l = left->proc();
         auto r = right->proc();
+        if (l.type != r.type) {l.runtimeCaster(r);}
         if (l.type == VarType::SIGNED) {
             return std::get<int>(l.s) * std::get<int>(r.s);
         }
@@ -123,6 +132,7 @@ public:
     Value proc() override {
         auto l = left->proc();
         auto r = right->proc();
+        if (l.type != r.type) {l.runtimeCaster(r);}
         if (l.type == VarType::SIGNED) {
             if (std::get<int> (l.s) == 0) {/* error */ }
             else return std::get<int>(l.s) / std::get<int>(r.s);
@@ -148,6 +158,7 @@ public:
     Value proc() override {
         auto l = left->proc();
         auto r = right->proc();
+        if (l.type != r.type) {l.runtimeCaster(r);}
         if (l.type == VarType::SIGNED) {
             return std::get<int>(l.s) % std::get<int>(r.s);
         }

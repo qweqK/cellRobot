@@ -4,25 +4,35 @@
 
 class AssignNode : public Node {
     std::unique_ptr<VlueTypeNode> expr;
-    std::unordered_map<std::string, SIT>& varst;
+    Data &varst;
     std::string var;
 
 public:
-    AssignNode(std::string varr, std::unique_ptr<VlueTypeNode> exprs, std::unordered_map<std::string, SIT> &vars) : var(std::move(varr)), varst(vars){
-        if (varst.contains(var)) {
-            if (!varst[var].isConst) {
-                if (varst[var].value.type != exprs->getValType()) {
-                    if (varst[var].value.type == VarType::MATRIX || exprs->getValType() == VarType::MATRIX) { throw std::invalid_argument("Matrix cast type not supported"); }
-                    TypeCaster tk(varst[var].value.type, std::move(exprs));
-                    exprs = std::move(tk.cast());
+    AssignNode(std::string varr, std::unique_ptr<VlueTypeNode> exprs, Data &d) : var(std::move(varr)), varst(d){
+        auto a = varst.getBuildValue(var);
+            if (!a.isConst) {
+                if (a.value.type != exprs->getValType()) {
+                    if (a.value.type == VarType::DEFAULT || expr->getValType() == VarType::DEFAULT) {
+
+                    }
+                    else {
+                        if (a.value.type == VarType::MATRIX || exprs->getValType() == VarType::MATRIX) { throw std::invalid_argument("Matrix cast type not supported"); }
+                        TypeCaster tk(a.value.type, std::move(exprs));
+                        exprs = std::move(tk.cast());
+                    }
                 }
             } else {throw std::runtime_error("it const");}
-        } else {throw std::runtime_error("not exist");}
         expr = std::move(exprs);
     }
 
     Value proc() override {
-        varst[var] = {expr->proc(), false}; return 0;
+        /*if (varst[var].value.type == VarType::DEFAULT || expr->getValType() == VarType::DEFAULT) {
+            auto val = expr->proc();
+
+        }
+        else {*/
+           // varst[var] = {expr->proc(), false}; return 0;
+        //}
     }
     void print() override {std::cout << var<< " <- "; expr->print();}
 };
@@ -57,6 +67,7 @@ public:
         const auto col = std::get<unsigned int>(right->proc().s);
         auto val = expr->proc();
         if (a.cols < row || a.rows < col) {throw std::runtime_error("range_out");}
+        val.castSelf(a.t);
         switch (a.t) {
             case VarType::CELL: a(row, col) =  get<Cell>(val.s); break;
             case VarType::SIGNED: a(row, col) =get<int>(val.s);break;
@@ -71,15 +82,13 @@ public:
 class MatrixAssignAccesNode : public VlueTypeNode {
     VarType t;
     std::string name;
-    std::unordered_map<std::string, SIT>& varst;
+    Data &varst;
     std::unique_ptr<VlueTypeNode> left;
     std::unique_ptr<VlueTypeNode> right;
     public:
-    MatrixAssignAccesNode(std::string m, std::unordered_map<std::string, SIT>& varstt, std::unique_ptr<VlueTypeNode> leftn, std::unique_ptr<VlueTypeNode> rightn) : name(std::move(m)), varst(varstt){
-        if (!varst.contains(name)) {std::cout << "mextq" << std::endl;}
-        t = std::get<Matrix>(varst[name].value.s).t;
-
-
+    MatrixAssignAccesNode(std::string m, Data &d, std::unique_ptr<VlueTypeNode> leftn, std::unique_ptr<VlueTypeNode> rightn) : name(std::move(m)), varst(d){
+        auto a = varst.getBuildValue(name);
+        t = std::get<Matrix>(a.value.s).t;
         if (leftn->getValType() != VarType::UNSIGNED) {TypeCaster tk(VarType::UNSIGNED,std::move(leftn)); leftn = std::move(tk.cast());}
         if (rightn->getValType() != VarType::UNSIGNED) {TypeCaster tk(VarType::UNSIGNED,std::move(rightn)); rightn = std::move(tk.cast());}
         left = std::move(leftn);
@@ -87,12 +96,10 @@ class MatrixAssignAccesNode : public VlueTypeNode {
     }
     void print() override {
         std::cout << "matrix" << name << "("; left->print(); std::cout << ", "; right->print(); std::cout << ")";
-
     }
     VarType getValType() override{return  t;}
     void setValType(VarType tt) override{t = tt;}
     Value proc() override {
-
         auto & a = std::get<Matrix>(varst[name].value.s);
         const auto row = std::get<unsigned int>(left->proc().s);
         const auto col = std::get<unsigned int>(right->proc().s);

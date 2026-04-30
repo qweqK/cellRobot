@@ -2,13 +2,8 @@
 #include "diffValues.h"
 #include  "memory"
 #include <unordered_map>
-class Node {
-public:
-    virtual void print() {std::cout << "wait the minute" << std::endl;};
-    virtual ~Node() = default;
-    virtual Value proc() {Value v = 0; return v;};
+#include "data.h"
 
-};
 
 
 class VlueTypeNode : public Node {
@@ -21,14 +16,16 @@ public:
 class VarNode : public VlueTypeNode {
 public:
     std::string id;
-    std::unordered_map<std::string, SIT> &varst;
+    Data &varst;
     VarType t;
-    VarNode(std::string & str, std::unordered_map<std::string, SIT> &varstr ) : id(std::move(str)), varst(varstr), t(varst[id].value.type) {
-        std::cout << varst[id].value.s.index()  << std::endl;
+    VarNode(std::string & str, Data &varstr ) : id(std::move(str)), varst(varstr) {
+            auto a = varst.getBuildValue(str);
+            t = a.value.type;
     }
+
     VarType getValType() override{return t;}
     void setValType(VarType tt) override{ t = tt ;}
-    Value proc()override{return varst[id].value;};
+    //Value proc()override{return varst[id].value;};
     void print() override{  std::cout << id;}
 };
 
@@ -69,5 +66,4 @@ class EmptyNode : public Node {
     Value proc() override {return 0;}
     void print() override {std::cout << "null" << std::endl;}
 };
-
 

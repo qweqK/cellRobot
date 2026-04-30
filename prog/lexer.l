@@ -38,8 +38,10 @@
 [-{}()><=+*/;{},%] { return *yytext;}
 [ \n\t\r] {}
 
+<<EOF>> {return 0;}
 
 . { std::cout << "bred" << yytext << "\n"; }
+
 
 %%
 
