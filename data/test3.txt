@@ -13,8 +13,18 @@
      {
      signed a <- 5;
      printvar a;
-     }
      printvar a;
+     }
+     matrix signed o(4, 4);
+     o(3, 3) <- 45;
+     printvar o;
+     {
+       signed o <- o(3,3);
+       printvar o;
+     }
+     signed f <- 0;
+     printvar f;
+
   }
 
 
@@ -23,11 +33,11 @@ func summul(signed a, signed b) {
     var <- var *b;
     signed c <- call mephi(var a);
     c;
+    testonce(c<10) { b;}
 }
 
 
 func mephi(signed v, signed b) {
     signed var <- v + b;
     var;
-
 }

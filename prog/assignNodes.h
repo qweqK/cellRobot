@@ -14,7 +14,7 @@ public:
         t =a.value.type;
             if (!a.isConst) {
                 if (a.value.type != exprs->getValType()) {
-                    if (a.value.type == VarType::DEFAULT || expr->getValType() == VarType::DEFAULT) {
+                    if (a.value.type == VarType::DEFAULT || exprs->getValType() == VarType::DEFAULT) {
 
                     }
                     else {
@@ -113,7 +113,8 @@ class MatrixAssignAccesNode : public VlueTypeNode {
             case VarType::SIGNED: return std::get<int>(a(row,col));
             case VarType::UNSIGNED: return std::get<unsigned int>(a(row,col));
             case VarType::MATRIX: return std::get<Cell>(a(row, col));
-                default: std::monostate();;
+                default: std::monostate();
         }
+        return std::monostate();
     }
 };

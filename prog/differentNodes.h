@@ -32,12 +32,13 @@ public:
                 r.castSelf(VarType::SIGNED);
                 t = std::get<int>(r.s);
             }
-        }
+
+        };
         if(left->getValType() == VarType::SIGNED) {
             while (std::get<int>(left->proc().s)) {right->proc();}
         }
         else while (std::get<unsigned int>(right->proc().s)) {left->proc();}
-        return std::monostate();
+        return  std::monostate() ;
     }
     void print() override {std::cout << "while("; left->print(); std::cout << ")" << std::endl; right->print();};
 };
@@ -61,6 +62,15 @@ public:
     }
 
     Value proc() override {
+        if (left->getValType() == VarType::DEFAULT) {
+            auto r = left->proc();
+            r.castSelf(VarType::SIGNED);
+            auto t = std::get<int>(r.s);
+            if (t) {
+                right->proc();
+            }
+        }
+
         if (left->getValType() == VarType::SIGNED) {
             if (std::get<int>(left->proc().s)) {right->proc();}
         }

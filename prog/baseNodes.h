@@ -91,7 +91,7 @@ class PrintNode : public Node {
     public:
     PrintNode(std::string v, Data &data) : var(std::move(v)), data(data) {}
     Value proc() override {
-        std::cout << var << ": " <<data.callStack.top().getValue(var).value << std::endl;
+        std::cout << data.callStack.top().ts.size() << " "  <<var << ": " <<data.callStack.top().getValue(var).value << std::endl;
         return std::monostate();
     }
     void print() override {

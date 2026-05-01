@@ -7,8 +7,8 @@ public:
     VarType t;
     VarType getValType() override{return t;}
     void setValType(VarType tt)override{ t = tt ;}
-    std::unique_ptr<Node> left;
-    std::unique_ptr<Node> right;
+    std::unique_ptr<VlueTypeNode> left;
+    std::unique_ptr<VlueTypeNode> right;
     ArithNode( std::unique_ptr<VlueTypeNode> leftn, std::unique_ptr<VlueTypeNode> rightn )  {
         if (leftn->getValType() == VarType::DEFAULT || rightn->getValType() == VarType::DEFAULT) {
             t= VarType::DEFAULT;
@@ -50,6 +50,8 @@ class PlusNode : public ArithNode {
         else if (l.type == VarType::MATRIX) {
             return std::get<Matrix>(l.s) + std::get<Matrix>(r.s);
         }
+        return std::monostate();
+
     }
 
     void print() override{left->print();std::cout << "+"; right->print();}
@@ -80,6 +82,8 @@ class MinusNode : public ArithNode {
         else if (l.type == VarType::MATRIX) {
 
         }
+        return std::monostate();
+
     }
     void print() override{left->print();std::cout << "-"; right->print();}
 
@@ -120,6 +124,10 @@ public:
         else if (l.type == VarType::CELL) {
             return std::get<Cell> (l.s) * std::get<Cell>(r.s);
         }
+        else if (l.type == VarType::MATRIX) {
+
+        }
+        return std::monostate();
     }
     void print() override{left->print();std::cout << "*"; right->print();}
 
@@ -146,6 +154,7 @@ public:
         }
         else if (l.type == VarType::MATRIX) {
         }
+        return std::monostate();
     }
     void print() override{left->print();std::cout << "/"; right->print();}
 
@@ -171,6 +180,7 @@ public:
         else if (l.type == VarType::MATRIX) {
 
         }
+        return std::monostate();
     }
     void print() override{left->print();std::cout << "%"; right->print();}
 
@@ -179,7 +189,24 @@ public:
 
 class GreaterNode : public ArithNode {
 public:
-    GreaterNode(std::unique_ptr<VlueTypeNode> leftn, std::unique_ptr<VlueTypeNode> rightn) : ArithNode(std::move(leftn), std::move(rightn)) {}
+    GreaterNode(std::unique_ptr<VlueTypeNode> leftn, std::unique_ptr<VlueTypeNode> rightn) : ArithNode(std::move(leftn), std::move(rightn)) {
+         if (left->getValType() == VarType::MATRIX || left->getValType() == VarType::CELL || right->getValType() == VarType::MATRIX || right->getValType() == VarType::CELL) { throw std::invalid_argument("non right param");}
+    }
+    Value proc() override{
+        auto l = left->proc();
+        auto r = right->proc();
+        if (l.type != r.type) {l.runtimeCaster(r); if (l.type == VarType::CELL) throw std::invalid_argument("fizhma");}
+        if (l.type == VarType::SIGNED) {
+            if (std::get<int>(l.s)> std::get<int>(r.s)) return 1;
+            else return 0;
+        }
+        else if (l.type == VarType::UNSIGNED) {
+            if (std::get<int>(l.s)> std::get<int>(r.s)) return 1u;
+            else return 0u;
+        }
+        return std::monostate();
+
+    };
     void print() override{left->print();std::cout << ">" << std::endl; right->print();}
 
     };
@@ -187,14 +214,48 @@ public:
 class LessNode : public ArithNode {
     public:
 
-        LessNode(std::unique_ptr<VlueTypeNode> leftn, std::unique_ptr<VlueTypeNode> rightn) : ArithNode(std::move(leftn), std::move(rightn)) {}
+        LessNode(std::unique_ptr<VlueTypeNode> leftn, std::unique_ptr<VlueTypeNode> rightn) : ArithNode(std::move(leftn), std::move(rightn)) {
+         if (left->getValType() == VarType::MATRIX || left->getValType() == VarType::CELL || right->getValType() == VarType::MATRIX || right->getValType() == VarType::CELL) { throw std::invalid_argument("non right param");}
+        }
+        Value proc() override{
+            auto l = left->proc();
+            auto r = right->proc();
+            if (l.type != r.type) {l.runtimeCaster(r); if (l.type == VarType::CELL) throw std::invalid_argument("fizhma");}
+            if (l.type == VarType::SIGNED) {
+                if (std::get<int>(l.s) < std::get<int>(r.s)) return 1;
+                else return 0;
+            }
+            else if (l.type == VarType::UNSIGNED) {
+                if (std::get<int>(l.s) < std::get<int>(r.s)) return 1u;
+                else return 0u;
+            }
+            return std::monostate();
+
+        };
         void print() override{left->print();std::cout << "<" << std::endl; right->print();}
 
     };
 
     class EqNode : public ArithNode {
     public:
-        EqNode(std::unique_ptr<VlueTypeNode> leftn, std::unique_ptr<VlueTypeNode> rightn) : ArithNode(std::move(leftn), std::move(rightn)) {}
+        EqNode(std::unique_ptr<VlueTypeNode> leftn, std::unique_ptr<VlueTypeNode> rightn) : ArithNode(std::move(leftn), std::move(rightn)) {
+         if (left->getValType() == VarType::MATRIX || left->getValType() == VarType::CELL || right->getValType() == VarType::MATRIX || right->getValType() == VarType::CELL) { throw std::invalid_argument("non right param");}
+        }
+        Value proc() override{
+            auto l = left->proc();
+            auto r = right->proc();
+            if (l.type != r.type) {l.runtimeCaster(r); if (l.type == VarType::CELL) throw std::invalid_argument("fizhma");}
+            if (l.type == VarType::SIGNED) {
+                if (std::get<int>(l.s) == std::get<int>(r.s)) return 1;
+                else return 0;
+            }
+            else if (l.type == VarType::UNSIGNED) {
+                if (std::get<int>(l.s) == std::get<int>(r.s)) return 1u;
+                else return 0u;
+            }
+            return std::monostate();
+        };
+
         void print() override {
             left->print();std::cout << "=" << std::endl; right->print();
         }

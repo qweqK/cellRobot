@@ -5,6 +5,7 @@ func start() {
    signed rq <- eq + 3;
    testrep (eq) {
 
+
    eq <- eq -1;
    rq <- rq +1;
    }

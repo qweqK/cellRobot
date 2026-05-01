@@ -1,9 +1,19 @@
 
-func start {
-    signed eq <- 12;
-    eq-2;
-    eq <- 4;
-    eq <- eq+15;
-    6-eq;
 
+func start() {
+    signed n <- 14;
+    signed i <- call fibonacci(n);
+    printvar i;
+}
+
+
+func fibonacci(signed n){
+signed t <- n;
+signed t2 <- n-1;
+signed t3 <- n-2;
+   testonce(n>1) {
+      t <- call fibonacci(t2) + call fibonacci(t3);
+   }
+   printvar t;
+   t;
 }

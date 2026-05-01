@@ -75,6 +75,8 @@ figure_bracket_open:
 
 function:
     preFunc sentces '}' {
+
+    $2->print();
     data.fStore.emplace($1.first, Function(std::move($2), std::move($1.second)));
     data.buildStorage.pop_back();
     }
@@ -144,9 +146,9 @@ expr:
     | expr '/' expr { $$ = std::make_unique<DivNode>(std::move($1),std::move($3));}
     | expr '%' expr { $$ = std::make_unique<DivModNode>(std::move($1),std::move($3));}
     | '(' expr ')' { $$ = std::move($2);}
-    | expr '<' expr { /*$$ = ($1 < $3);*/}
-    | expr '>' expr {}
-    | expr EQ expr {}
+    | expr '>' expr { $$ = std::make_unique<GreaterNode>(std::move($1), std::move($3));}
+    | expr '<' expr { $$ = std::make_unique<LessNode>(std::move($1), std::move($3));}
+    | expr EQ expr { $$ = std::make_unique<EqNode>(std::move($1), std::move($3));}
     | CALL VAR '(' varsc ')' {$$ = std::make_unique<CallFuncNode>($2, std::move($4), data);}
     | CALL VAR '(' ')' {$$ = std::make_unique<CallFuncNode>($2, data);}
     ;
