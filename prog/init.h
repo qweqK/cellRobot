@@ -12,28 +12,27 @@
 
     public:
         InitNode(std::string var, std::unique_ptr<VlueTypeNode> rightn,  Data &d, VarType tt,bool isConst=false) : varst(d), t(tt), name(std::move(var)), isConst(isConst) {
-            if (varst.buildStorage.rbegin()->contains(name)) throw std::invalid_argument("Variable name already exists");
-            if (rightn->getValType() == VarType::MATRIX || rightn->getValType() == VarType::CELL) {throw std::invalid_argument("Matrix type not supported");}
-            if ( t == VarType::SIGNED && rightn->getValType() != VarType::SIGNED) {
-                rightn = std::make_unique<UnsignToSigned>(std::move(rightn));
+            if (varst.buildStorage.back().contains(name)) throw std::invalid_argument("Variable name already exists");
+            if (rightn->getValType()==VarType::MATRIX) throw std::invalid_argument("Matrix type not supported");
+            if (t != rightn->getValType()) {
+                TypeCaster tk(t,std::move(rightn));
+                rightn = std::move(tk.cast());
             }
-            else if ( t == VarType::UNSIGNED && rightn -> getValType() != VarType::UNSIGNED) {
-                rightn = std::make_unique<SignedToUnsign>(std::move(rightn));
-            }
-
-            if (rightn->getValType() == VarType::UNSIGNED) {
-                (*varst.buildStorage.rbegin())[name] = {0u, isConst};
-            }
-            else if (rightn->getValType() == VarType::SIGNED) {
-                (*varst.buildStorage.rbegin())[name] = {0, isConst};
-            }
-
             right = std::move(rightn);
+            if (t == VarType::UNSIGNED) {
+                d.buildStorage.back()[name] = {0u, false};
+            }
+            else if (t==VarType::SIGNED) {
+                d.buildStorage.back()[name] = {0, false};
+            }
         }
         Value proc() override {
             auto r =  right->proc();
-            varst[name] = {std::move(r), isConst};
-            return 0;
+            if (right->getValType()==VarType::DEFAULT) {
+                r.castSelf(t);
+            }
+            varst.callStack.top().newPut(name, {r,isConst});
+            return std::monostate();
         };
         void print() override{std::cout << name << "<-"; right->print();}
 
@@ -54,11 +53,14 @@
     public:
 
         InitCellNode(std::string s, std::vector<std::pair<bool, bool>> v, Data &d,bool isConst=false ) : name(std::move(s)), varst(d), t(VarType::CELL), isConst(isConst) {
-            if (varst.buildStorage.rbegin()->contains(name)) throw std::invalid_argument("Variable name already exists");
+            if (varst.buildStorage.back().contains(name)) throw std::invalid_argument("Variable name already exists");
             walls = {v[0].first, v[1].first, v[2].first, v[3].first};
             (*varst.buildStorage.rbegin())[name] = {Cell(walls[0], walls[1], walls[2], walls[3]), isConst};
         }
-        Value proc() override {return 0;};
+        Value proc() override {
+            varst.callStack.top().newPut(name, {{walls[0], walls[1], walls[2], walls[3]}, isConst});
+            return std::monostate();
+        }
         void print() override {
             std::cout << name << "<-";
             std::cout<< walls[0] <<"|"<<walls[1]<< "|"<<walls[2] << "|" << walls[3];
@@ -76,16 +78,19 @@
     public:
         InitMatrixNode(std::string s, std::unique_ptr<VlueTypeNode> leftn, std::unique_ptr<VlueTypeNode> rightn, VarType tt,Data &d ) : t(tt), varst(d), name(std::move(s)) {
             if (t == VarType::MATRIX) {throw std::invalid_argument("Matrix type not supported");}
-            if (varst.buildStorage.rbegin()->contains(name)) throw std::invalid_argument("Variable name already exists");
+            if (varst.buildStorage.back().contains(name)) throw std::invalid_argument("Variable name already exists");
             if (leftn->getValType() != VarType::UNSIGNED) {TypeCaster tk(VarType::UNSIGNED,std::move(leftn)); leftn = std::move(tk.cast());}
             if (rightn->getValType() != VarType::UNSIGNED) {TypeCaster tk(VarType::UNSIGNED,std::move(rightn)); rightn = std::move(tk.cast());}
             left = std::move(leftn);
             right = std::move(rightn);
-            (*varst.buildStorage.rbegin())[name] = {Matrix(t, 0, 0), false};
+            (*varst.buildStorage.rbegin())[name] = {Matrix(t, 0u, 0u), false};
         }
         Value proc() override {
-            (*va.buildStorage.rbegin())[name] = {Matrix(t, std::get<unsigned int>(left->proc().s), std::get<unsigned int>(right->proc().s))};
-            return 0;
+            varst.callStack.top().newPut(name, {Matrix(t, std::get<unsigned int>(left->proc().s), std::get<unsigned int>(right->proc().s)), false});
+            return std::monostate();
+        }
+        void print() override {
+            std::cout << name << "<-" << "matrix" << std::endl;
         }
     };
 

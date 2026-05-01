@@ -184,7 +184,7 @@ public:
 
     };
 
-    class LessNode : public ArithNode {
+class LessNode : public ArithNode {
     public:
 
         LessNode(std::unique_ptr<VlueTypeNode> leftn, std::unique_ptr<VlueTypeNode> rightn) : ArithNode(std::move(leftn), std::move(rightn)) {}
@@ -199,3 +199,5 @@ public:
             left->print();std::cout << "=" << std::endl; right->print();
         }
     };
+
+

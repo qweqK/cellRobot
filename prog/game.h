@@ -9,7 +9,7 @@ class Game {
     std::string filename;
 
     public:
-    void printTable();
+    //void printTable();
     Game(std::string str) : data(), parser(yy::parser(data)), filename(std::move(str)) {}
     void run();
 };

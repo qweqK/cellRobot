@@ -20,6 +20,7 @@
     #include "differentNodes.h"
     #include "diffValues.h"
     #include "init.h"
+    #include "funtionNodes.h"
     #include "robotActionNodes.h"
     void error(const std::string &msg);
 
@@ -36,20 +37,20 @@
 
 
 
-%token CONST CALL TESTREP TESTONCE FUNC SIGNED UNSIGNED CELL MATRIX ASSIGN  BOTTOM XRAY
+%token CONST CALL TESTREP TESTONCE FUNC SIGNED UNSIGNED CELL MATRIX ASSIGN  BOTTOM XRAY PRINTVAR
 %token <std::string> VAR
 %token <unsigned int> UNUM
 %token <int> NUM
 %token <int> TOP LEFT RIGHT  NTOP DOWN NDOWN NLEFT NRIGHT
 %type <std::unique_ptr<VlueTypeNode>> expr
-//%type <std::vector<int>> cellArg
 %type<std::unique_ptr<Node>> sent init sentces
 %type <int> noWall
 %type <int> yesWall
 %type <std::vector<std::pair<bool, bool>>> cellArg
-%type <TSC> params
+%type <PARAMS> params
 %type <std::pair<std::string, SIT>> param
-%type <std::pair<std::string, TSC>>  preFunc
+%type <std::pair<std::string, PARAMS>> preFunc
+%type <std::vector<std::string>> varsc
 %left '+' '-'
 %left GE LE EQ NE '>' '<'
 %left '*' '/' '%'
@@ -69,56 +70,63 @@ prog:
     |
     ;
 
+figure_bracket_open:
+    '{' {data.buildStorage.emplace_back();}
 
 function:
-    preFunc '{'sentces'}' {
-    data.fStore.emplace($1.first, Function(std::move($1.second)), std::move($3)));
+    preFunc sentces '}' {
+    data.fStore.emplace($1.first, Function(std::move($2), std::move($1.second)));
     data.buildStorage.pop_back();
     }
     ;
-preFunc:
-     FUNC VAR '('params')' {}
 
+preFunc:
+     FUNC VAR '('params')' '{' {
+        $$ = std::make_pair(std::move($2), std::move($4));
+        data.buildStorage.emplace_back();
+        data.addBuildParams($$.second);
+     }
 
 params:
-     param {$$.emplace($1);}
-    | params ',' param {$$.emplace($3);}
+     param {$$.push_back($1);}
+    | params ',' param {$$ = std::move($1); $$.push_back($3);}
     | {}
     ;
 param:
-    SIGNED VAR {$$  = std::make_pair<$2, SIT(0, false)>;}
-    |UNSIGNED VAR {$$  = std::make_pair<$2, SIT(0u, false)>;}
-    |MATRIX CELL VAR {$$  = std::make_pair<$3, SIT(Matrix(VarType::SIGNED, 0, 0), false)>;}
-    |MATRIX SIGNED VAR {$$  = std::make_pair<$3, SIT(Matrix(VarType::UNSIGNED, 0, 0), false)>;}
-    |MATRIX UNSIGNED VAR {$$  = std::make_pair<$3, SIT(Matrix(VarType::CELL, 0, 0), false)>;}
-    |CELL VAR {$$  = std::make_pair<$2, SIT(Cell(), true)>;}
-    |CONST SIGNED VAR {$$  = std::make_pair<$3, SIT(0, true)>;}
-    |CONST UNSIGNED VAR {$$  = std::make_pair<$3, SIT(0u, true)>;}
-    |CONST CELL VAR {$$  = std::make_pair<$3, SIT(Cell(), true)>;}
+    SIGNED VAR {$$  = std::make_pair(std::move($2), SIT(0, false));}
+    |UNSIGNED VAR {$$  = std::make_pair(std::move($2), SIT(0u, false));}
+    |MATRIX CELL VAR {$$  = std::make_pair(std::move($3), SIT(Matrix(VarType::SIGNED, 0, 0), false));}
+    |MATRIX SIGNED VAR {$$  = std::make_pair(std::move($3), SIT(Matrix(VarType::UNSIGNED, 0, 0), false));}
+    |MATRIX UNSIGNED VAR {$$  = std::make_pair(std::move($3), SIT(Matrix(VarType::CELL, 0, 0), false));}
+    |CELL VAR {$$  = std::make_pair(std::move($2), SIT(Cell(), true));}
+    |CONST SIGNED VAR {$$  = std::make_pair(std::move($3), SIT(0, true));}
+    |CONST UNSIGNED VAR {$$  = std::make_pair(std::move($3), SIT(0u, true));}
+    |CONST CELL VAR {$$  = std::make_pair(std::move($3), SIT(Cell(), true));}
     ;
 
 
 
 sent:
-    ';' {$$ = std::make_unique<EmptyNode>();}
-     | expr ';' {if(!$1) std::cout << "nullptr Expros" <<std::endl; $$ = std::move($1); }
-     | init {$$ = std::move($1);}
-     |TESTREP '(' expr ')' sent {$$ = make_unique<TestRepNode>(std::move($3), std::move($5));}
-     | TESTONCE '(' expr ')' sent {$$ = make_unique<TestOnceNode>(std::move($3), std::move($5));}
-     | '{' sentces '}' {$$ = std::move($2); data.buildStorage.pop_back();}
-     | TOP ';' {}
-     | BOTTOM ';' {}
-     | LEFT ';' {}
-     | RIGHT ';' {}
-     | VAR ASSIGN expr ';'{$$ = make_unique<AssignNode>($1, std::move($3), *data.varstCur);}
-     | VAR '('expr ',' expr ')' ASSIGN expr {$$ = std::make_unique<MatrixAccesNode>($1, *data.varstCur,std::move($8) ,std::move($3), std::move($5));}
+    ';'                                      {$$ = std::make_unique<EmptyNode>();}
+     | expr ';'                             {if(!$1) std::cout << "nullptr Expros" <<std::endl; $$ = std::move($1); }
+     | init                                 {$$ = std::move($1);}
+     |TESTREP '(' expr ')' sent             {$$ = make_unique<TestRepNode>(std::move($3), std::move($5));}
+     | TESTONCE '(' expr ')' sent           {$$ = make_unique<TestOnceNode>(std::move($3), std::move($5));}
+     | figure_bracket_open sentces '}'      {$$ = std::make_unique<BracketNode>(std::move($2), data); data.buildStorage.pop_back();}
+     | TOP ';'                              {}
+     | BOTTOM ';'                           {}
+     | LEFT ';'                             {}
+     | RIGHT ';'                            {}
+     | VAR ASSIGN expr ';'                  {$$ = make_unique<AssignNode>($1, std::move($3), data);}
+     | VAR '('expr ',' expr ')' ASSIGN expr ';'  {$$ = std::make_unique<MatrixAccesNode>($1, std::move($8),data ,std::move($3), std::move($5));}
+     | PRINTVAR VAR ';' { $$ = std::make_unique<PrintNode>($2, data);}
      ;
 
 
 
 
 sentces:
-     sent { $$ = std::move($1); data.buildStorage.emplace_back(); }
+     sent { $$ = std::move($1); }
      |sentces sent {  $$ = make_unique<EndSentNode>(std::move($1), std::move($2));}
      ;
 
@@ -127,9 +135,9 @@ expr:
     NUM {$$=std::make_unique<LiterNode>($1, VarType::SIGNED); }
     | UNUM {$$ =  std::make_unique<LiterNode>($1, VarType::UNSIGNED);}
     | XRAY {}
-    | VAR '('expr ',' expr ')' {$$ = std::make_unique<MatrixAssignAccesNode>($1, *data.varstCur, std::move($3), std::move($5));}
+    | VAR '('expr ',' expr ')' {$$ = std::make_unique<MatrixAssignAccesNode>($1, data, std::move($3), std::move($5));}
     | '-'expr %prec UMINUS {$$ = std::make_unique<UminusNode>(std::move($2));}
-    | VAR {$$ = std::make_unique<VarNode>($1, *data.varstCur);}
+    | VAR {$$ = std::make_unique<VarNode>($1, data);}
     | expr '+' expr { $$ = std::make_unique<PlusNode>(std::move($1),std::move($3)); }
     | expr '-' expr { $$ = std::make_unique<MinusNode>(std::move($1),std::move($3)); }
     | expr '*' expr { $$ = std::make_unique<MulNode>(std::move($1),std::move($3));}
@@ -139,26 +147,26 @@ expr:
     | expr '<' expr { /*$$ = ($1 < $3);*/}
     | expr '>' expr {}
     | expr EQ expr {}
-    | CALL VAR '(' varsc ')' {}
-    | CALL VAR '(' ')' {}
+    | CALL VAR '(' varsc ')' {$$ = std::make_unique<CallFuncNode>($2, std::move($4), data);}
+    | CALL VAR '(' ')' {$$ = std::make_unique<CallFuncNode>($2, data);}
     ;
 
     varsc:
-        VAR {}
-        | varsc  VAR {}
+        VAR {$$.push_back($1);}
+        | varsc  VAR {$$ = std::move($1); $$.push_back($2);}
 
 
 init:
-    CONST UNSIGNED VAR ASSIGN expr ';'{ $$ = std::make_unique<InitNode>($3, std::move($5), *data.varstCur, VarType::UNSIGNED, true);}
-    |CONST SIGNED VAR ASSIGN  expr ';' {$$ = std::make_unique<InitNode>($3, std::move($5), *data.varstCur,VarType::SIGNED, true);}
-    |CONST CELL VAR ASSIGN '(' cellArg ')' ';' {$$ = std::make_unique<InitCellNode>($3, $6, *data.varstCur, true);}
-    | MATRIX SIGNED VAR '(' expr ',' expr ')' ';'  {$$ = std::make_unique<InitMatrixNode>($3, std::move($5), std::move($7), VarType::SIGNED, *data.varstCur);}
-    | MATRIX UNSIGNED VAR '(' expr ',' expr ')' ';' {$$ = std::make_unique<InitMatrixNode>($3, std::move($5), std::move($7), VarType::UNSIGNED, *data.varstCur);}
-    | MATRIX CELL VAR  '(' expr ',' expr ')' ';' {$$ = std::make_unique<InitMatrixNode>($3, std::move($5), std::move($7), VarType::CELL, *data.varstCur);}
+    CONST UNSIGNED VAR ASSIGN expr ';'{ $$ = std::make_unique<InitNode>($3, std::move($5), data, VarType::UNSIGNED, true);}
+    |CONST SIGNED VAR ASSIGN  expr ';' {$$ = std::make_unique<InitNode>($3, std::move($5), data,VarType::SIGNED, true);}
+    |CONST CELL VAR ASSIGN '(' cellArg ')' ';' {$$ = std::make_unique<InitCellNode>($3, $6, data, true);}
+    | MATRIX SIGNED VAR '(' expr ',' expr ')' ';'  {$$ = std::make_unique<InitMatrixNode>($3, std::move($5), std::move($7), VarType::SIGNED, data);}
+    | MATRIX UNSIGNED VAR '(' expr ',' expr ')' ';' {$$ = std::make_unique<InitMatrixNode>($3, std::move($5), std::move($7), VarType::UNSIGNED, data);}
+    | MATRIX CELL VAR  '(' expr ',' expr ')' ';' {$$ = std::make_unique<InitMatrixNode>($3, std::move($5), std::move($7), VarType::CELL, data);}
 
-    |UNSIGNED VAR ASSIGN expr ';' {$$ = std::make_unique<InitNode>($2, std::move($4), *data.varstCur, VarType::UNSIGNED);}
-    |SIGNED VAR ASSIGN expr ';'{ $$ = std::make_unique<InitNode>($2, std::move($4), *data.varstCur,VarType::SIGNED);}
-    |CELL VAR ASSIGN '(' cellArg ')' ';'{ $$ = std::make_unique<InitCellNode>($2, $5,*data.varstCur);}
+    |UNSIGNED VAR ASSIGN expr ';' {$$ = std::make_unique<InitNode>($2, std::move($4), data, VarType::UNSIGNED);}
+    |SIGNED VAR ASSIGN expr ';'{ $$ = std::make_unique<InitNode>($2, std::move($4), data,VarType::SIGNED);}
+    |CELL VAR ASSIGN '(' cellArg ')' ';'{ $$ = std::make_unique<InitCellNode>($2, $5, data);}
     |UNSIGNED VAR ';'{ }
     |SIGNED VAR';' { }
     |CELL VAR ';' {}

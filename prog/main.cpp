@@ -8,7 +8,7 @@ int main() {
     std::cout << "Hello World!" << std::endl;
     Game game("test3.txt");
     game.run();
-    game.printTable();
+   // game.printTable();
 }
 
 // void yy::parser::error(const std::string &msg) {

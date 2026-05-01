@@ -13,6 +13,8 @@ func start() {
    unsigned f <- 4u;
    cell fa <- (left, top,right, down);
    signed celsa <- 4 + fa;
+   printvar celsa;
+   printvar eq;
 }
 
 

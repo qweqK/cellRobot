@@ -19,13 +19,13 @@ public:
     Data &varst;
     VarType t;
     VarNode(std::string & str, Data &varstr ) : id(std::move(str)), varst(varstr) {
-            auto a = varst.getBuildValue(str);
+            auto a = varst.getBuildValue(id);
             t = a.value.type;
     }
 
     VarType getValType() override{return t;}
     void setValType(VarType tt) override{ t = tt ;}
-    //Value proc()override{return varst[id].value;};
+    Value proc()override{return varst.callStack.top().getValue(id).value;};
     void print() override{  std::cout << id;}
 };
 
@@ -65,5 +65,37 @@ public:
 class EmptyNode : public Node {
     Value proc() override {return 0;}
     void print() override {std::cout << "null" << std::endl;}
+};
+
+class BracketNode : public Node {
+    std::unique_ptr<Node> next;
+    Data &data;
+public:
+    BracketNode(std::unique_ptr<Node>  next, Data &data) : next(std::move(next)), data(data) {
+        data.buildStorage.emplace_back();
+    }
+    Value proc() override {
+        data.callStack.top().ts.emplace_back();
+        next->proc();
+        data.callStack.top().ts.pop_back();
+        return std::monostate();
+    }
+    void  print() override {
+        std::cout << "{"; next->print(); std::cout << "}" << std::endl;
+    }
+};
+
+class PrintNode : public Node {
+    std::string var;
+    Data &data;
+    public:
+    PrintNode(std::string v, Data &data) : var(std::move(v)), data(data) {}
+    Value proc() override {
+        std::cout << var << ": " <<data.callStack.top().getValue(var).value << std::endl;
+        return std::monostate();
+    }
+    void print() override {
+        std::cout << "print: " << var;
+    }
 };
 

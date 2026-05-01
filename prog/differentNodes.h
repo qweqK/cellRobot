@@ -37,13 +37,10 @@ public:
             while (std::get<int>(left->proc().s)) {right->proc();}
         }
         else while (std::get<unsigned int>(right->proc().s)) {left->proc();}
-        return 0;
+        return std::monostate();
     }
-    void print() override {std::cout << "while("; left->print(); std::cout << ") {" << std::endl; right->print(); std::cout <<  std::endl << "}" << std::endl;};
-
+    void print() override {std::cout << "while("; left->print(); std::cout << ")" << std::endl; right->print();};
 };
-
-
 
 class TestOnceNode: public Node {
     std::unique_ptr<VlueTypeNode> left;
@@ -70,8 +67,8 @@ public:
         else {
             if (std::get<unsigned int>(left->proc().s)) {right->proc();}
         }
-        return 0;
+        return std::monostate();
     }
-    void print() override {std::cout << "if("; left->print(); std::cout << ") {" << std::endl; right->print(); std::cout << std::endl << "}" << std::endl;};
+    void print() override {std::cout << "if("; left->print(); std::cout << ")" << std::endl; right->print();}
 
 };

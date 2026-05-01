@@ -21,29 +21,12 @@ public:
 };
 
 
-
-class TableSym {
-public:
-    using TSC = std::unordered_map<std::string, SIT>;
-    TSC varstCur;
-    TableSym * prev;
-    TableSym() : prev(nullptr) {}
-    TableSym(TableSym * prev) : prev(prev) {}
-    SIT getValue(std::string varName) {
-        for (TableSym * e = this; e->prev != nullptr; e = e->prev) {
-            if (e->varstCur.contains(varName)) {
-                return varstCur[varName];
-            }
-        }
-        throw std::invalid_argument("Variable name not found");
-    }
-};
-
 class Function {
     public:
-    TSC params;
+    PARAMS params;
     std::unique_ptr<Node> root;
-    Function(std::unique_ptr<Node> r, TSC p) : params(std::move(p)), root(std::move(r)) {}
+    int i;
+    Function(std::unique_ptr<Node> r, PARAMS p) : params(std::move(p)), root(std::move(r)), i(params.size()) {}
     Function() = default;
     Function(Function &&) = default;
     Function &operator=(Function &&) = default;
@@ -54,32 +37,58 @@ class Function {
 class Frame {
     public:
     Node * root;
-    TSC &params;
+    PARAMS params;
     std::vector<TSC> ts;
     TSC * global;
-    SIT getValue(const std::string &varName) {
+    int i;
+
+    SIT &getValue(const std::string &varName) {
         for (auto it = ts.rbegin(); it != ts.rend(); ++it) {
             if (it->contains(varName)) {return (*it)[varName];}
         }
-         if (global->contains(varName)) {return (*global)[varName];}
+         if (global->contains(varName)) {
+
+             return (*global)[varName];
+         }
          throw std::runtime_error("Variable name not found kakogo?");
     }
     void newPut(const std::string &name, SIT s) {
-        (*ts.rbegin())[name] = s;
+        (*ts.rbegin())[name] = std::move(s);
     }
     void oldPut(const std::string &name, SIT s) {
         for (auto it = ts.rbegin(); it != ts.rend(); ++it) {
             if (it->contains(name)) {
-                (*it)[name] = s;
+                (*it)[name] = std::move(s);
             }
         }
-        if (global->contains(name)) {
-            (*global)[name] = s;
+        if (global && global->contains(name)) {
+            (*global)[name] = std::move(s);
         }
     }
-    Frame(Node *r, TSC &par, TSC *global) : root(r), params(par) ,global(global) {
-        ts.emplace_back(params.begin(), params.end());
+    Frame(Node *r,PARAMS par, TSC *global) : root(r), params(par) ,global(global) {
+        ts.emplace_back();
+    }
 
+    Value proc() {
+      auto a = root->proc();
+        return a;
+    }
+
+    bool prepareToStart(PARAMS par){
+        if (par.size() != params.size() ) {return false;}
+        for (int i = 0; i < par.size(); i++) {
+            if (par[i].second.value.type != params[i].second.value.type) {return false;}
+            if (par[i].second.value.type == VarType::MATRIX) {
+               if ( par[i].second.value.s.index() != params[i].second.value.s.index()) return false;
+            }
+        }
+
+        for (int i = 0; i < par.size(); i++) {
+            auto bir  = par[i].second;
+            ts.back().emplace(params[i].first,bir);
+        }
+
+        return true;
     }
 
 };
@@ -95,14 +104,28 @@ class Frame {
             for (auto it = buildStorage.rbegin(); it != buildStorage.rend(); ++it) {
                 if (it->contains(varName)) {return (*it)[varName];}
             }
-            throw std::invalid_argument("Variable name not found");
+            throw std::invalid_argument("Variable name not found" + varName);
+        }
+        void addBuildParams(PARAMS pr) {
+            for (auto &a : pr) {
+                buildStorage.back().emplace(a);
+            }
+        }
+        bool chekIsExist(std::string varName) {
+            for (auto it = buildStorage.rbegin(); it != buildStorage.rend(); ++it) {
+                if (it->contains(varName)) {return true;}
+            }
+            return false;
         }
         void interpritation() {
             if (!fStore.contains("start")) throw std::invalid_argument("start not found");
-            callStack.push({fStore["start"].root.get(),fStore["start"].params,  varst.get()});
+            callStack.emplace(fStore["start"].root.get(),fStore["start"].params,  varst.get());
             callStack.top().root->proc();
         }
         Data() = default;
+
+
+
     };
 
 
