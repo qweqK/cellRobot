@@ -28,6 +28,7 @@
 "right" {yylval->emplace<int>(3); return yy::parser::token::RIGHT;}
 "ntop" {yylval->emplace<int>(0); return yy::parser::token::NTOP;}
 "ndown" {yylval->emplace<int>(1); return yy::parser::token::NDOWN;}
+"bottom" {yylval->emplace<int>(1)}; return yy::parser::token::BOTTOM;}
 "nright" {yylval->emplace<int>(3); return yy::parser::token::NRIGHT;}
 "nleft" {yylval->emplace<int>(2); return yy::parser::token::NLEFT;}
 "printvar" {yylval->emplace<int>(2); return yy::parser::token::PRINTVAR;}

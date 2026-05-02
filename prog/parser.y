@@ -39,11 +39,11 @@
 
 
 
-%token CONST CALL TESTREP TESTONCE FUNC SIGNED UNSIGNED CELL MATRIX ASSIGN  BOTTOM XRAY PRINTVAR
+%token CONST CALL TESTREP TESTONCE FUNC SIGNED UNSIGNED CELL MATRIX ASSIGN  XRAY PRINTVAR
 %token <std::string> VAR
 %token <unsigned int> UNUM
 %token <int> NUM
-%token <int> TOP LEFT RIGHT  NTOP DOWN NDOWN NLEFT NRIGHT
+%token <int> TOP LEFT RIGHT  NTOP DOWN NDOWN NLEFT NRIGHT BOTTOM
 %type <std::unique_ptr<VlueTypeNode>> expr
 %type<std::unique_ptr<Node>> sent init sentces
 %type <int> noWall
@@ -117,10 +117,10 @@ sent:
      |TESTREP '(' expr ')' sent             {$$ = make_unique<TestRepNode>(std::move($3), std::move($5));}
      | TESTONCE '(' expr ')' sent           {$$ = make_unique<TestOnceNode>(std::move($3), std::move($5));}
      | figure_bracket_open sentces '}'      {$$ = std::make_unique<BracketNode>(std::move($2), data); data.buildStorage.pop_back();}
-     | TOP ';'                              {}
-     | BOTTOM ';'                           {}
-     | LEFT ';'                             {}
-     | RIGHT ';'                            {}
+     | TOP ';'                              { $$ = std::make_unique<MoveNode>(DIRECT::UP, data.map);}
+     | BOTTOM ';'                           {$$ = std::make_unique<MoveNode>(DIRECT::DOWN, data.map);}
+     | LEFT ';'                             {$$ = std::make_unique<MoveNode>(DIRECT::LEFT, data.map);}
+     | RIGHT ';'                            {$$ = std::make_unique<MoveNode>(DIRECT::RIGHT, data.map);}
      | VAR ASSIGN expr ';'                  {$$ = make_unique<AssignNode>($1, std::move($3), data);}
      | VAR '('expr ',' expr ')' ASSIGN expr ';'  {$$ = std::make_unique<MatrixAccesNode>($1, std::move($8),data ,std::move($3), std::move($5));}
      | PRINTVAR VAR ';' { $$ = std::make_unique<PrintNode>($2, data);}

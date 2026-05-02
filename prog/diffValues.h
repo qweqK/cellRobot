@@ -6,13 +6,14 @@
 
 enum class VarType {DEFAULT = 0,SIGNED=1, UNSIGNED=2, CELL=3, MATRIX=4};
 enum class NodeType {VAR_NODE, OPER_NODE, CONST_NODE};
-enum class DIRECT {UP=1, DOWN=2, LEFT=2, RIGHT=3};
+enum class DIRECT {UP=0, DOWN=1, LEFT=2, RIGHT=3};
 
 
 class Cell {
 public:
     //std::vector<bool> data;
     int data[4];
+
     Cell operator +(Cell&r) {return {data[0] || r.data[0], data[1] || r.data[1], data[2] || r.data[2], data[3] || r.data[3]};}
     Cell operator -(Cell&r) {return {data[0]  != r.data[0], data[1] != r.data[1], data[2] != r.data[2], data[3] != r.data[3]};}
     Cell operator %(Cell&r) {return {data[0]  != r.data[0], data[1] != r.data[1], data[2] != r.data[2], data[3] != r.data[3]};}

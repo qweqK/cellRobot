@@ -10,7 +10,7 @@
 #include "parser.hpp"
 #include <unordered_map>
 #include "diffValues.h"
-
+#include "robot.h"
 
 class Node {
 public:
@@ -96,10 +96,12 @@ class Frame {
 
     class Data {
     public:
+        GameMap &map;
         std::unique_ptr<TSC> varst;
         std::vector<TSC> buildStorage;
         std::stack<Frame> callStack;
         std::unordered_map<std::string, Function> fStore;
+        Data(GameMap & m) : map(m) {}
         SIT getBuildValue(std::string varName) {
             for (auto it = buildStorage.rbegin(); it != buildStorage.rend(); ++it) {
                 if (it->contains(varName)) {return (*it)[varName];}
