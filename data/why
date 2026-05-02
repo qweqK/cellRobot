@@ -1,0 +1,10 @@
+
+func start() {
+    signed a <- 4;
+    a <- 4;
+    printvar a;
+    matrix signed o(4,5);
+    matrix signed s;
+    printvar o;
+    printvar s;
+}

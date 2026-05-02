@@ -20,10 +20,10 @@
             }
             right = std::move(rightn);
             if (t == VarType::UNSIGNED) {
-                d.buildStorage.back()[name] = {0u, false};
+                d.buildStorage.back()[name] = {0u, isConst};
             }
             else if (t==VarType::SIGNED) {
-                d.buildStorage.back()[name] = {0, false};
+                d.buildStorage.back()[name] = {0, isConst};
             }
         }
         Value proc() override {
@@ -93,4 +93,57 @@
             std::cout << name << "<-" << "matrix" << std::endl;
         }
     };
+
+class InitEmptyNode : public Node {
+    Data & varst;
+    VarType t;
+    std::string name;
+    bool isConst;
+    public:
+    InitEmptyNode(std::string s, VarType tt, Data &d, bool c= false) : t(tt), varst(d), name(std::move(s)), isConst(c) {
+        if (t == VarType::MATRIX) throw std::invalid_argument("Matrix type not supported");
+        if (d.buildStorage.back().contains(name)) throw std::invalid_argument("Variable name already exists");
+        if (t == VarType::UNSIGNED) {
+            d.buildStorage.back()[name] = {0u, isConst};
+        }
+        else if (t==VarType::SIGNED) {
+            d.buildStorage.back()[name] = {0, isConst};
+        }
+        else if (t  == VarType::CELL) {
+            d.buildStorage.back()[name] = {Cell(), isConst};
+        }
+    }
+    Value proc() override {
+
+        varst.callStack.top().newPut(name, {Value(0u),isConst});
+        switch (t) {
+            case VarType::UNSIGNED:  varst.callStack.top().newPut(name, {Value(0u),isConst}); break;
+            case VarType::CELL: varst.callStack.top().newPut(name, {Cell(),isConst}); break;
+            case VarType::SIGNED: varst.callStack.top().newPut(name, {Value(0),isConst}); break;
+                default: throw std::invalid_argument("Unsupported type");
+        }
+        return std::monostate();
+    }
+
+};
+
+
+class InitEmptyMatrixNode : public Node {
+    VarType t;
+    std::string name;
+    Data & varst;
+public:
+    InitEmptyMatrixNode(std::string n, VarType tt, Data &d) : t(tt), varst(d), name(std::move(n)) {
+        if (t == VarType::MATRIX) {throw std::invalid_argument("Matrix type not supported");}
+        if (varst.buildStorage.back().contains(name)) {throw std::invalid_argument("Variable name already exists");}
+        (*varst.buildStorage.rbegin())[name] = {Matrix(t, 0u, 0u), false};
+    }
+    Value proc() override {
+        varst.callStack.top().newPut(name, {Matrix(t, 0u, 0u), false});
+        return std::monostate();
+    }
+
+
+
+};
 

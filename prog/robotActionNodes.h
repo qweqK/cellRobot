@@ -1,6 +1,6 @@
 #pragma once
 #include "baseNodes.h"
-
+#include "robot.h"
 class XrayNode : public VlueTypeNode {
     Robot &rb;
     GameMap &map;

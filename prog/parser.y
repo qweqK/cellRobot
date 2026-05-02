@@ -8,6 +8,7 @@
 
 %parse-param {Data &data}
 
+
 %code requires {
     #include "data.h"
     extern int yylineno;
@@ -21,6 +22,7 @@
     #include "diffValues.h"
     #include "init.h"
     #include "funtionNodes.h"
+    #include "robot.h"
     #include "robotActionNodes.h"
     void error(const std::string &msg);
 
@@ -76,7 +78,7 @@ figure_bracket_open:
 function:
     preFunc sentces '}' {
 
-    $2->print();
+    //$2->print();
     data.fStore.emplace($1.first, Function(std::move($2), std::move($1.second)));
     data.buildStorage.pop_back();
     }
@@ -149,6 +151,7 @@ expr:
     | expr '>' expr { $$ = std::make_unique<GreaterNode>(std::move($1), std::move($3));}
     | expr '<' expr { $$ = std::make_unique<LessNode>(std::move($1), std::move($3));}
     | expr EQ expr { $$ = std::make_unique<EqNode>(std::move($1), std::move($3));}
+    | '#' expr {$$ = std::make_unique<MatrUnaryOper>(std::move($2));}
     | CALL VAR '(' varsc ')' {$$ = std::make_unique<CallFuncNode>($2, std::move($4), data);}
     | CALL VAR '(' ')' {$$ = std::make_unique<CallFuncNode>($2, data);}
     ;
@@ -169,9 +172,16 @@ init:
     |UNSIGNED VAR ASSIGN expr ';' {$$ = std::make_unique<InitNode>($2, std::move($4), data, VarType::UNSIGNED);}
     |SIGNED VAR ASSIGN expr ';'{ $$ = std::make_unique<InitNode>($2, std::move($4), data,VarType::SIGNED);}
     |CELL VAR ASSIGN '(' cellArg ')' ';'{ $$ = std::make_unique<InitCellNode>($2, $5, data);}
-    |UNSIGNED VAR ';'{ }
-    |SIGNED VAR';' { }
-    |CELL VAR ';' {}
+    |UNSIGNED VAR ';'{ $$ = std::make_unique<InitEmptyNode>($2, VarType::UNSIGNED, data);}
+    |SIGNED VAR';' { $$ = std::make_unique<InitEmptyNode>($2, VarType::SIGNED, data);}
+    |CELL VAR ';' { $$ = std::make_unique<InitEmptyNode>($2, VarType::CELL, data);}
+    |CONST UNSIGNED VAR ';'{ $$ = std::make_unique<InitEmptyNode>($3, VarType::UNSIGNED, data, true);}
+    |CONST SIGNED VAR';' { $$ = std::make_unique<InitEmptyNode>($3, VarType::SIGNED, data, true);}
+    |CONST CELL VAR ';' { $$ = std::make_unique<InitEmptyNode>($3, VarType::CELL, data, true);}
+    |MATRIX SIGNED VAR ';' { $$ = std::make_unique<InitEmptyMatrixNode>($3, VarType::SIGNED, data);}
+    |MATRIX UNSIGNED VAR ';' {$$ = std::make_unique<InitEmptyMatrixNode>($3, VarType::UNSIGNED, data);}
+    |MATRIX CELL VAR ';' {$$ = std::make_unique<InitEmptyMatrixNode>($3, VarType::CELL, data);}
+
 
 
 cellArg:

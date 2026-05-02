@@ -1,0 +1,29 @@
+
+
+func start() {
+   matrix signed first;
+   printvar first;
+   signed row <- 4;
+   signed col <- 5;
+   matrix signed second(row,col);
+   signed r1 <- 0;
+   printvar r1;
+   testrep(r1 < row) {
+        signed c <- 0;
+        printvar c;
+        testrep(c < col) {
+            second(r1, c) <- c+1;
+            c <- c + 1;
+        }
+        r1 <- r1 + 1;
+   }
+    printvar r1;
+   printvar second;
+   printvar first;
+   first <- second;
+   printvar first;
+   printvar second;
+   first <- #second;
+   printvar first;
+
+}

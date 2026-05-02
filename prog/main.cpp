@@ -6,7 +6,7 @@
 
 int main() {
     std::cout << "Hello World!" << std::endl;
-    Game game("test.txt");
+    Game game("empty.txt" , "map1.txt");
     game.run();
    // game.printTable();
 }

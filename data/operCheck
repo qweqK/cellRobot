@@ -1,0 +1,34 @@
+
+func start() {
+    signed row <- 5;
+    signed col <- 4;
+    matrix signed ma(row, col);
+    signed r <- 0;
+    testrep(r<row) {
+    signed c <- 0;
+        testrep(c < col) {
+            ma(r, c) <- 1;
+            c <- c +1 ;
+        }
+        r <- r+1;
+    }
+   matrix signed am(row, col);
+   signed r1 <- 0;
+   printvar row;
+   printvar col;
+   testrep(r1<row) {
+      signed c <- 0;
+          testrep(c < col) {
+               am(r1, c) <- 1;
+               c <- c + 1;
+           }
+           r1 <- r1+1;
+   }
+   matrix signed f(row, col);
+   f <- am + ma;
+   printvar f;
+   printvar ma;
+   printvar am;
+}
+
+

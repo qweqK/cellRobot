@@ -29,7 +29,22 @@ public:
     }
 };
 
+class MatrUnaryOper : public VlueTypeNode {
+    std::unique_ptr<VlueTypeNode> expr;
+    VarType t;
+public:
+    void setValType(VarType tt) override { t= tt;}
+    VarType getValType() override {return t;};
 
+    MatrUnaryOper(std::unique_ptr<VlueTypeNode> exprs): expr(std::move(exprs)), t(VarType::MATRIX) {
+        if (expr->getValType() != VarType::MATRIX) {
+            throw std::runtime_error("MatrUnaryOper: not a matrix");
+        }
+    }
+    Value proc() override {
+        return std::get<Matrix>(expr->proc().s).opersharp();
+    };
+};
 
 class PlusNode : public ArithNode {
     public:
@@ -260,5 +275,3 @@ class LessNode : public ArithNode {
             left->print();std::cout << "=" << std::endl; right->print();
         }
     };
-
-

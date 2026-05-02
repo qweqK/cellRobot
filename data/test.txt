@@ -1,7 +1,7 @@
 
 
 func start() {
-    signed n <- 14;
+    signed n <- 20;
     signed i <- call fibonacci(n);
     printvar i;
 }
@@ -14,6 +14,10 @@ signed t3 <- n-2;
    testonce(n>1) {
       t <- call fibonacci(t2) + call fibonacci(t3);
    }
-   printvar t;
    t;
 }
+
+
+
+
+

@@ -2,40 +2,22 @@
 #include <vector>
 #include <variant>
 #include <iostream>
+#include <numeric>
 
 enum class VarType {DEFAULT = 0,SIGNED=1, UNSIGNED=2, CELL=3, MATRIX=4};
 enum class NodeType {VAR_NODE, OPER_NODE, CONST_NODE};
 enum class DIRECT {UP=1, DOWN=2, LEFT=2, RIGHT=3};
 
 
-class Robot {
-
-};
-
-class GameMap {
-
-};
-
-
 class Cell {
 public:
     //std::vector<bool> data;
     int data[4];
-    Cell operator +(Cell&r) {
-        return {data[0] || r.data[0], data[1] || r.data[1], data[2] || r.data[2], data[3] || r.data[3]};
-    }
-    Cell operator -(Cell&r) {
-        return {data[0]  != r.data[0], data[1] != r.data[1], data[2] != r.data[2], data[3] != r.data[3]};
-    }
-    Cell operator %(Cell&r) {
-        return {data[0]  != r.data[0], data[1] != r.data[1], data[2] != r.data[2], data[3] != r.data[3]};
-    }
-    Cell operator /(Cell&r) {
-        return {data[0]  != r.data[0], data[1] != r.data[1], data[2] != r.data[2], data[3] != r.data[3]};
-    }
-    Cell operator *(Cell &r) {
-        return {data[0] && r.data[0], data[1] && r.data[1], data[2] && r.data[2], data[3] && r.data[3]};
-    }
+    Cell operator +(Cell&r) {return {data[0] || r.data[0], data[1] || r.data[1], data[2] || r.data[2], data[3] || r.data[3]};}
+    Cell operator -(Cell&r) {return {data[0]  != r.data[0], data[1] != r.data[1], data[2] != r.data[2], data[3] != r.data[3]};}
+    Cell operator %(Cell&r) {return {data[0]  != r.data[0], data[1] != r.data[1], data[2] != r.data[2], data[3] != r.data[3]};}
+    Cell operator /(Cell&r) {return {data[0]  != r.data[0], data[1] != r.data[1], data[2] != r.data[2], data[3] != r.data[3]};}
+    Cell operator *(Cell &r) {return {data[0] && r.data[0], data[1] && r.data[1], data[2] && r.data[2], data[3] && r.data[3]};}
 
     Cell(bool f, bool s, bool t, bool fo) {
         //data = {f, s, t, fo};
@@ -57,6 +39,19 @@ public:
 
 
 class Matrix {
+    Matrix cellProc() {
+        Matrix res = *this;
+        for (int i = 0; i < res.rows; i++) {
+            for (int j = 0; j < res.cols; j++) {
+                if (j + 1 < res.cols && std::get<Cell>(res.operator()(i, j+1)).data[2] == 1) {std::get<Cell>(res.operator()(i, j)).data[3] = 1;}
+                if (j - 1 > 0 && std::get<Cell>(res.operator()(i, j-1)).data[3] == 1) {std::get<Cell>(res.operator()(i, j)).data[2] = 1;}
+                if (res.cols *(j+1) < res.rows * res.cols && std::get<Cell>(res.operator()(i, j-1)).data[0] == 1) {std::get<Cell>(res.operator()(i, j)).data[1] = 1;}
+                if (res.cols *(j-1) > 0 && std::get<Cell>(res.operator()(i, j-1)).data[1] == 1) {std::get<Cell>(res.operator()(i, j)).data[0] = 1;}
+            }
+
+        }
+        return  res;
+    }
 public:
     VarType t;
     unsigned int rows;
@@ -75,13 +70,11 @@ public:
         }
 
     };
+    Matrix(VarType tt, unsigned int h, unsigned int v, std::vector<val> other) : t(tt), rows(h), cols(v), mat(std::move(other)) {}
 
     val& operator () (unsigned int r, unsigned int c) {
+        if (r>rows || c>cols) throw std::range_error ("out of rangeeee");
         return mat[r * cols + c];
-    }
-
-    Matrix operator +(Matrix&r) {
-        return r;
     }
 
     friend std::ostream& operator << (std::ostream& out,  Matrix &rhs) {
@@ -111,6 +104,90 @@ public:
             }
         }
         return out;
+    }
+    Matrix opersharp() {
+        switch (t) {
+            case VarType::SIGNED: {
+                int sum = 0;
+                for (auto m : mat) sum = sum + std::get<int>(m);
+                sum /= cols*rows;
+                Matrix res(VarType::SIGNED, cols, rows, mat);
+                for (auto &m : res.mat) std::get<int>(m) = sum;
+                return res;
+            } break;
+            case VarType::UNSIGNED: {
+                int sum = 0;
+                for (auto m : mat) sum = sum + std::get<int>(m);
+                sum /= cols*rows;
+                Matrix res(VarType::UNSIGNED, cols, rows, mat);
+                for (auto &m : res.mat) std::get<unsigned int>(m) = sum;
+                return res;
+            }break;
+            case  VarType::CELL: {
+                return cellProc();
+            }break;
+        }
+    }
+
+    Matrix operator +(Matrix &rhs) {
+        unsigned int newRows = std::min(rows, rhs.rows);
+        unsigned int newCols = std::min(cols, rhs.cols);
+        Matrix res(t, newRows, newCols);
+        switch (t) {
+            case VarType::UNSIGNED : for (int i =0; i< newRows; i++) for (int j=0; j < newCols; j++) res(i, j) = std::get<unsigned int>(operator()(i,j)) + std::get<unsigned int>(rhs(i, j));break;
+            case VarType::CELL : for (int i =0; i< newRows; i++) for (int j=0; j < newCols; j++) res(i, j) = std::get<Cell>(operator()(i,j)) + std::get<Cell>(rhs(i, j)); break;
+            case VarType::SIGNED : for (int i =0; i< newRows; i++) for (int j=0; j < newCols; j++) res(i, j) = std::get<int>(operator()(i,j)) + std::get<int>(rhs(i, j));break;
+        }
+        return res;
+
+    }
+    Matrix operator -(Matrix &rhs) {
+        unsigned int newRows = std::min(rows, rhs.rows);
+        unsigned int newCols = std::min(cols, rhs.cols);
+        Matrix res(t, newRows, newCols);
+        switch (t) {
+            case VarType::UNSIGNED : for (int i =0; i< newRows; i++) for (int j=0; j < newCols; j++) res(i, j) = std::get<unsigned int>(operator()(i,j)) - std::get<unsigned int>(rhs(i, j));break;
+            case VarType::CELL : for (int i =0; i< newRows; i++) for (int j=0; j < newCols; j++) res(i, j) = std::get<Cell>(operator()(i,j)) - std::get<Cell>(rhs(i, j)); break;
+            case VarType::SIGNED : for (int i =0; i< newRows; i++) for (int j=0; j < newCols; j++) res(i, j) = std::get<int>(operator()(i,j)) - std::get<int>(rhs(i, j));break;
+        }
+        return res;
+
+    }
+
+    Matrix operator *(Matrix &rhs) {
+        unsigned int newRows = std::min(rows, rhs.rows);
+        unsigned int newCols = std::min(cols, rhs.cols);
+        Matrix res(t, newRows, newCols);
+        switch (t) {
+            case VarType::UNSIGNED : for (int i =0; i< newRows; i++) for (int j=0; j < newCols; j++) res(i, j) = std::get<unsigned int>(operator()(i,j)) * std::get<unsigned int>(rhs(i, j));break;
+            case VarType::CELL : for (int i =0; i< newRows; i++) for (int j=0; j < newCols; j++) res(i, j) = std::get<Cell>(operator()(i,j)) * std::get<Cell>(rhs(i, j)); break;
+            case VarType::SIGNED : for (int i =0; i< newRows; i++) for (int j=0; j < newCols; j++) res(i, j) = std::get<int>(operator()(i,j)) * std::get<int>(rhs(i, j));break;
+        }
+        return res;
+
+    }
+    Matrix operator /(Matrix &rhs) {
+        unsigned int newRows = std::min(rows, rhs.rows);
+        unsigned int newCols = std::min(cols, rhs.cols);
+        Matrix res(t, newRows, newCols);
+        switch (t) {
+            case VarType::UNSIGNED : for (int i =0; i< newRows; i++) for (int j=0; j < newCols; j++) res(i, j) = std::get<unsigned int>(operator()(i,j)) / std::get<unsigned int>(rhs(i, j));break;
+            case VarType::CELL : for (int i =0; i< newRows; i++) for (int j=0; j < newCols; j++) res(i, j) = std::get<Cell>(operator()(i,j)) / std::get<Cell>(rhs(i, j)); break;
+            case VarType::SIGNED : for (int i =0; i< newRows; i++) for (int j=0; j < newCols; j++) res(i, j) = std::get<int>(operator()(i,j)) / std::get<int>(rhs(i, j));break;
+        }
+        return res;
+
+    }
+    Matrix operator %(Matrix &rhs) {
+        unsigned int newRows = std::min(rows, rhs.rows);
+        unsigned int newCols = std::min(cols, rhs.cols);
+        Matrix res(t, newRows, newCols);
+        switch (t) {
+            case VarType::UNSIGNED : for (int i =0; i< newRows; i++) for (int j=0; j < newCols; j++) res(i, j) = std::get<unsigned int>(operator()(i,j)) + std::get<unsigned int>(rhs(i, j));break;
+            case VarType::CELL : for (int i =0; i< newRows; i++) for (int j=0; j < newCols; j++) res(i, j) = std::get<Cell>(operator()(i,j)) + std::get<Cell>(rhs(i, j)); break;
+            case VarType::SIGNED : for (int i =0; i< newRows; i++) for (int j=0; j < newCols; j++) res(i, j) = std::get<int>(operator()(i,j)) + std::get<int>(rhs(i, j));break;
+        }
+        return res;
     }
 };
 
@@ -209,6 +286,11 @@ public:
             s = nr;
             type = VarType::UNSIGNED;
         }
+    }
+
+    void castSelf(VarType t, VarType tt) {
+        if (std::get<Matrix>(s).t != tt ) { throw std::runtime_error("runtime caster for matrix error"); }
+        else {type = VarType::MATRIX;}
     }
     friend std::ostream& operator << (std::ostream& out,  Value &rhs) {
         switch (rhs.type) {

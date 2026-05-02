@@ -36,7 +36,7 @@
 [0-9]+u {std::string s(yytext, yyleng-1); yylval->emplace<unsigned int>(std::stoul(s)); return yy::parser::token::UNUM;}
 [a-zA-Z][a-zA-Z0-9]* { yylval->emplace<std::string>(yytext); return yy::parser::token::VAR;}
 "//"[^\n]* {}
-[-{}()><=+*/;{},%] { return *yytext;}
+[-{}()><=+*/;{},%#] { return *yytext;}
 [ \n\t\r] {}
 
 <<EOF>> {return 0;}

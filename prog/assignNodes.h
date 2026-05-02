@@ -30,11 +30,20 @@ public:
     Value proc() override {
         if (expr->getValType() == VarType::DEFAULT) {
             auto val = expr->proc();
-            val.castSelf(t);
+            if (t != VarType::MATRIX) val.castSelf(t);
+            else val.castSelf(VarType::MATRIX, std::get<Matrix>(varst.callStack.top().getValue(var).value.s).t);
             varst.callStack.top().oldPut(var, val);
             return std::monostate();
         }
-        else {
+        else if (expr->getValType() == VarType::MATRIX) {
+            auto val = expr->proc();
+            if (std::get<Matrix>(varst.callStack.top().getValue(var).value.s).t != std::get<Matrix>(val.s).t) {
+                std::cout << "qq";
+                throw std::runtime_error("Matrix type dont match");
+            }
+            varst.callStack.top().oldPut(var, expr->proc()); return  std::monostate();;
+        }
+        else  {
             varst.callStack.top().oldPut(var, expr->proc()); return  std::monostate();;
         }
     }
@@ -99,9 +108,12 @@ class MatrixAssignAccesNode : public VlueTypeNode {
         left = std::move(leftn);
         right = std::move(rightn);
     }
+
     void print() override {
         std::cout << "matrix" << name << "("; left->print(); std::cout << ", "; right->print(); std::cout << ")";
     }
+
+
     VarType getValType() override{return  t;}
     void setValType(VarType tt) override{t = tt;}
     Value proc() override {

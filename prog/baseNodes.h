@@ -4,8 +4,6 @@
 #include <unordered_map>
 #include "data.h"
 
-
-
 class VlueTypeNode : public Node {
 public:
     virtual  VarType getValType() = 0;
@@ -98,4 +96,5 @@ class PrintNode : public Node {
         std::cout << "print: " << var;
     }
 };
+
 
