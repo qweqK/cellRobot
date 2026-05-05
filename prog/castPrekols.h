@@ -55,8 +55,9 @@ class CellToSigned : public VlueTypeNode {
     }
     void print() override{ std::cout << "CTS("; next->print(); std::cout << ")";}
     Value proc() override {
-        auto r = std::get<Cell>(next->proc().s);
-        int nr = r.data[0] && r.data[1] && r.data[2] && r.data[3];
+         auto r2 = (next->proc().s);
+        auto r = std::get<Cell>(r2);
+        int nr = r.data[0] || r.data[1] || r.data[2] || r.data[3];
         return nr;
     }
 
@@ -77,7 +78,7 @@ public:
 
     Value proc() override {
         auto r = std::get<Cell>(next->proc().s);
-        unsigned int nr = r.data[0] && r.data[1] && r.data[2] && r.data[3];
+        unsigned int nr = r.data[0] || r.data[1] || r.data[2] || r.data[3];
         return nr;
     }
 

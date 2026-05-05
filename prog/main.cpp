@@ -21,6 +21,8 @@ int main() {
    //Game game("empty.txt", "map1.txt");
    // Game game("cellTest", "map1.txt");
   //Game game("testGlob", "map1.txt");
+ //Game game("yaustal", "map1.txt");
+
 
 
     game.run();

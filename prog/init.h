@@ -137,7 +137,7 @@ class InitEmptyNode : public DefInitNode {
     }
     Value proc() override {
 
-        varst.callStack.top().newPut(name, {Value(0u),isConst});
+       // varst.callStack.top().newPut(name, {Value(0u),isConst});
         switch (t) {
             case VarType::UNSIGNED:  varst.callStack.top().newPut(name, {Value(0u),isConst}); break;
             case VarType::CELL: varst.callStack.top().newPut(name, {Cell(),isConst}); break;

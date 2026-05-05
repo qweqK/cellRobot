@@ -6,7 +6,7 @@
    "rXpos": 0,
    "rYpos": 0,
    "grid": [
-    [false, true, true, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false],
+    [false, true, true, false], [true, false, false, false], [false, true, true, false], [false, false, false, false], [false, false, false, false], [false, false, false, false],
     [false, false, true, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false],
     [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false],
     [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false],

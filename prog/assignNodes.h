@@ -122,11 +122,11 @@ class MatrixAssignAccesNode : public VlueTypeNode {
         auto & a = std::get<Matrix>(varst.callStack.top().getValue(name).value.s);
         const auto row = std::get<unsigned int>(left->proc().s);
         const auto col = std::get<unsigned int>(right->proc().s);
-        if (a.cols <= row || a.rows <= col) throw std::runtime_error("mnogovata budet: "  + std::to_string(loc.begin.line));
+        if (a.cols <= col || a.rows <= row) throw std::runtime_error("mnogovata budet: "  + std::to_string(loc.begin.line));
         switch (t) {
             case VarType::SIGNED: return std::get<int>(a(row,col));
             case VarType::UNSIGNED: return std::get<unsigned int>(a(row,col));
-            case VarType::MATRIX: return std::get<Cell>(a(row, col));
+            case VarType::CELL: return std::get<Cell>(a(row, col));
                 default: std::monostate();
         }
         return std::monostate();

@@ -1,0 +1,37 @@
+
+signed col <- 10;
+signed row <- 5;
+matrix signed locMap;
+
+func start () {
+      matrix signed m (row, col);
+      locMap <- m;
+      locMap(1,1) <- 1;
+      locMap(2,2) <- 1;
+      signed newRow <- row+10;
+      matrix signed newMap(newRow, col);
+      signed y <- 0;
+      testrep(y < row) {
+          signed x <- 0;
+          testrep(x < col){
+              printvar y;
+              newMap(y, x) <- locMap(y, x);
+              x <- x+1;
+          }
+          y <- y +1;
+      }
+      y <- 0;
+      signed yy <- row;
+      testrep(yy < newRow) {
+          signed x <- 0;
+          testrep(x < col) {
+            newMap(yy, x) <- 0;
+            x <- x+1;
+          }
+          yy <- yy +1;
+      }
+      printvar locMap;
+      printvar newMap;
+}
+
+

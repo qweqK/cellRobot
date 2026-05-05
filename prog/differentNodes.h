@@ -39,7 +39,7 @@ public:
         if(left->getValType() == VarType::SIGNED) {
             while (std::get<int>(left->proc().s)) {right->proc();}
         }
-        else while (std::get<unsigned int>(right->proc().s)) {left->proc();}
+        else while (std::get<unsigned int>(left->proc().s)) {right->proc();}
         return  std::monostate() ;
     }
     void print() override {std::cout << "while("; left->print(); std::cout << ")" << std::endl; right->print();};
@@ -76,7 +76,8 @@ public:
         }
 
         if (left->getValType() == VarType::SIGNED) {
-            if (std::get<int>(left->proc().s)) {right->proc();}
+            auto r = left->proc();
+            if (std::get<int>(r.s)) {right->proc();}
         }
         else {
             if (std::get<unsigned int>(left->proc().s)) {right->proc();}

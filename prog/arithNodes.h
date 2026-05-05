@@ -14,7 +14,8 @@ public:
     void setValType(VarType tt)override{ t = tt ;}
     std::unique_ptr<VlueTypeNode> left;
     std::unique_ptr<VlueTypeNode> right;
-    ArithNode( std::unique_ptr<VlueTypeNode> leftn, std::unique_ptr<VlueTypeNode> rightn, Data &d, yy::location ll) : d(d), loc(ll) {
+    ArithNode( std::unique_ptr<VlueTypeNode> leftn, std::unique_ptr<VlueTypeNode> rightn, Data &d, yy::location ll) :
+    d(d), loc(ll) {
         if (leftn->getValType() == VarType::DEFAULT || rightn->getValType() == VarType::DEFAULT) {
             t= VarType::DEFAULT;
             left = std::move(leftn);

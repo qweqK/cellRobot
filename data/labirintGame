@@ -1,63 +1,217 @@
-
 const cell rC <- (right);
 const cell lC <- (left);
 const cell tC <- (top);
 const cell dC <- (down);
-
+signed col <- 5;
+signed row <- 5;
+matrix signed locMap;
+signed cX<-0;
+signed cY<-0;
+signed ot1 <- 0;
+signed ot2 <- 1;
+signed ot3 <- 2;
 func start() {
+   matrix signed m (row, col);
+    locMap <- m;
     signed sh <- 10;
     printscr;
     testrep(sh>0) {
+        printvar sh;
         matrix cell r;
         r <- #xray;
+        printvar r;
         cell t;
-        t<- r(3,3);
-        signed rT <- t * rC;
-        testonce(rT = 0) {
-            right;
-            printscr;
+        t<- r(2,2);
+        signed check <- 0;
+        signed isMov <- 0;
+        check <- t * rC;
+        testonce(check = 0) {
+            testonce(isMov = 0) {
+                testonce( (cX +1)= col) {call extendRight();}
+                testonce( (cX +1)> col) {call extendRight();}
+                testonce(locMap(cY, cX + 1) <1) {
+                    locMap(cY, cX) <- locMap(cY, cX) + 1;
+                    printmap; right; printscr;
+                    cX <- cX +1;
+                    isMov <- 1;
+                }
+           }
         }
         testonce(rT = 1) {
+            printvar ot2;
             signed lT <- t * lC;
             testonce(lT = 0) {
-                left;
-                printscr;
+                lT<- 1;
+                testonce( (cX - 1) < 0) {call extendLeft();}
+                testonce(locMap(cY, cX -1) < 1) {
+                    left;
+                    printscr;
+                    locMap(cY, cX) <- 1;
+                    cX <- cX -1;
+                    lT <- 0;
+                }
 
             }
+            printvar ot1;
+            printvar lT;
             testonce(lT = 1) {
                 signed tT <- t * tC;
                 testonce(tT = 0) {
+                    tT <- 1;
+                    testonce( (cY -1) < 0) {call extendTop();}
+                    testonce(locMap(cY-1,cX) < 1) {
                     top;
                     printscr;
+                    locMap(cY, cX) <- 1;
+                    cY <- cY-1;
+                    tT <- 0;
+                  }
                 }
                 testonce(tT = 1) {
                     signed dT <- t * dC;
-                     testonce(dT = 0) {
+                    testonce( (cY +1) = row) {call extendDown();}
+                    testonce( (cY +1)> row) {call extendDown();}
+                    testonce(dT = 0) {
+                        dT <- 1;
+                        testonce(locMap(cY+1, cX) < 1) {
                         bottom;
                         printscr;
+                        locMap(cY, cX) <- 1;
+                        cY <- cY+1;
+                        dT <- 0;
                      }
-                }
+                  }
+                    testonce(dT = 1) {
+                      rT <- t * rC;
+                      testonce(rT = 0) {
+                        rT<- 1;
+                        testonce( (cX +1)= col) {call extendRight();}
+                        testonce( (cX +1)> col) {call extendRight();}
+                        testonce(locMap(cY, cX + 1) <1) {
+                            printmap;
+                            right;
+                            printscr;
+                            locMap(cY, cX) <- 1;
+                            cX <- cX +1;
+                            rT<-0;
+                        }
+               }
             }
         }
         sh <- sh -1;
     }
+
 }
 
 
 
 func extendLeft() {
-;
+      signed newCol <- col+10;
+      matrix signed newMap(row, newCol);
+      signed y <- 0;
+      testrep(y < row) {
+          signed x <- 0;
+          signed xx <- 10;
+          testrep(x < 10){
+              printvar y;
+              newMap(y, x) <- 0;
+              x <- x+1;
+          }
+          x <- 0;
+          testrep(xx<newCol) {
+              newMap(y,xx) <- locMap(y,x);
+              xx <- xx +1;
+              x <- x+1;
+          }
+          y <- y +1;
+      }
+      col <-newCol;
+      printvar locMap;
+      printvar newMap;
+      locMap <- newMap;
+      cX <- cX+10;
 }
-func extendRight() {
 
-;
+func extendRight() {
+       signed newCol <- col+10;
+       matrix signed newMap(row, newCol);
+       signed y <- 0;
+       testrep(y < row) {
+           signed x <- 0;
+           signed xx <- col;
+           testrep(x < col){
+               printvar y;
+               newMap(y, x) <- locMap(y,x);
+               x <- x+1;
+           }
+           testrep(xx<newCol) {
+               newMap(y,xx) <- 0;
+               xx <- xx +1;
+           }
+           y <- y +1;
+       }
+       col <- newCol;
+       printvar locMap;
+       printvar newMap;
+       locMap <- newMap;
 }
 
 func extendDown() {
-;
-
+  signed newRow <- row+10;
+      matrix signed newMap(newRow, col);
+      signed y <- 0;
+      testrep(y < row) {
+          signed x <- 0;
+          testrep(x < col){
+              printvar y;
+              newMap(y, x) <- locMap(y, x);
+              x <- x+1;
+          }
+          y <- y +1;
+      }
+      y <- 0;
+      signed yy <- row;
+      testrep(yy < newRow) {
+          signed x <- 0;
+          testrep(x < col) {
+            newMap(yy, x) <- 0;
+            x <- x+1;
+          }
+          yy <- yy +1;
+      }
+      row <- newRow;
+      printvar locMap;
+      printvar newMap;
 }
 
 func extendTop() {
-;
+      signed newRow <- row+10;
+      matrix signed newMap(newRow, col);
+      signed y <- 0;
+      testrep(y < 10) {
+          signed x <- 0;
+          testrep(x < col){
+              printvar y;
+              newMap(y, x) <- 0;
+              x <- x+1;
+          }
+          y <- y +1;
+      }
+      y <- 0;
+      signed yy <- 10;
+      testrep(y < row) {
+          signed x <- 0;
+          testrep(x < col) {
+            newMap(yy, x) <- locMap(y, x);
+            x <- x+1;
+          }
+          y <- y +1;
+          yy <- yy +1;
+      }
+      row <- newRow;
+      printvar locMap;
+      printvar newMap;
+      locMap <- newMap;
+      cY <- cY +10;
+
 }
