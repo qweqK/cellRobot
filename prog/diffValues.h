@@ -3,6 +3,7 @@
 #include <variant>
 #include <iostream>
 #include <numeric>
+#include "position.hh"
 
 enum class VarType {DEFAULT = 0,SIGNED=1, UNSIGNED=2, CELL=3, MATRIX=4};
 enum class NodeType {VAR_NODE, OPER_NODE, CONST_NODE};
@@ -12,7 +13,7 @@ enum class DIRECT {UP=0, DOWN=1, LEFT=2, RIGHT=3};
 class Cell {
 public:
     //std::vector<bool> data;
-    int data[4];
+    bool data[4];
 
     Cell operator +(Cell&r) {return {data[0] || r.data[0], data[1] || r.data[1], data[2] || r.data[2], data[3] || r.data[3]};}
     Cell operator -(Cell&r) {return {data[0]  != r.data[0], data[1] != r.data[1], data[2] != r.data[2], data[3] != r.data[3]};}
@@ -29,12 +30,12 @@ public:
         data[0] = false; data[1] = false; data[2]= false; data[3] = false;
     }
     friend std::ostream& operator << (std::ostream& out,  Cell &rhs) {
-        if (rhs.data[0]) out <<" ___"<< std::endl;
-        if (rhs.data[2]) out << "|";
-        out <<  "   ";
-        if (rhs.data[3]) out << "|" <<std::endl;
-        if (rhs.data[1]) out << " ‾‾‾";
-        return out;
+        int hexRes =0;
+        for (int i =0 ; i<4 ; i++) {
+            hexRes = (hexRes << 1) | rhs.data[i];
+        }
+        out << std::hex << hexRes;
+         return out;
     };
 };
 
@@ -45,11 +46,10 @@ class Matrix {
         for (int i = 0; i < res.rows; i++) {
             for (int j = 0; j < res.cols; j++) {
                 if (j + 1 < res.cols && std::get<Cell>(res.operator()(i, j+1)).data[2] == 1) {std::get<Cell>(res.operator()(i, j)).data[3] = 1;}
-                if (j - 1 > 0 && std::get<Cell>(res.operator()(i, j-1)).data[3] == 1) {std::get<Cell>(res.operator()(i, j)).data[2] = 1;}
-                if (res.cols *(j+1) < res.rows * res.cols && std::get<Cell>(res.operator()(i, j-1)).data[0] == 1) {std::get<Cell>(res.operator()(i, j)).data[1] = 1;}
-                if (res.cols *(j-1) > 0 && std::get<Cell>(res.operator()(i, j-1)).data[1] == 1) {std::get<Cell>(res.operator()(i, j)).data[0] = 1;}
+                if (j - 1 >= 0 && std::get<Cell>(res.operator()(i, j-1)).data[3] == 1) {std::get<Cell>(res.operator()(i, j)).data[2] = 1;}
+                if (i +1 < res.rows && std::get<Cell>(res.operator()(i+1, j)).data[0] == 1) {std::get<Cell>(res.operator()(i, j)).data[1] = 1;}
+                if (i -1 >= 0 && std::get<Cell>(res.operator()(i-1, j)).data[1] == 1) {std::get<Cell>(res.operator()(i, j)).data[0] = 1;}
             }
-
         }
         return  res;
     }
@@ -112,7 +112,7 @@ public:
                 int sum = 0;
                 for (auto m : mat) sum = sum + std::get<int>(m);
                 sum /= cols*rows;
-                Matrix res(VarType::SIGNED, cols, rows, mat);
+                Matrix res(VarType::SIGNED, rows, cols, mat);
                 for (auto &m : res.mat) std::get<int>(m) = sum;
                 return res;
             } break;
@@ -120,7 +120,7 @@ public:
                 int sum = 0;
                 for (auto m : mat) sum = sum + std::get<int>(m);
                 sum /= cols*rows;
-                Matrix res(VarType::UNSIGNED, cols, rows, mat);
+                Matrix res(VarType::UNSIGNED, rows, cols, mat);
                 for (auto &m : res.mat) std::get<unsigned int>(m) = sum;
                 return res;
             }break;

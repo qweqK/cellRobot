@@ -22,8 +22,8 @@ public:
             cols = j["cols"].get<int>();
             exitX  = j["exitX"].get<int>();
             exitY  = j["exitY"].get<int>();
-            rX = j["rSpos"].get<int>();
-            rY = j["rDpos"].get<int>();
+            rX = j["rXpos"].get<int>();
+            rY = j["rYpos"].get<int>();
             auto gridd = j["grid"].get<std::vector<std::vector<bool>>>();
             grid = Matrix(VarType::CELL, rows, cols);
             for (int i = 0; i < rows; i++) {

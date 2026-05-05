@@ -6,13 +6,15 @@
 class TestRepNode : public Node {
     std::unique_ptr<VlueTypeNode> left;
     std::unique_ptr<Node> right;
+    Data &d;
+    yy::location loc;
 public:
-    TestRepNode(std::unique_ptr<VlueTypeNode>  leftn, std::unique_ptr<Node> rightn) : right(std::move(rightn)) {
+    TestRepNode(std::unique_ptr<VlueTypeNode>  leftn, std::unique_ptr<Node> rightn, Data &d, yy::location l ) : right(std::move(rightn)), d(d), loc(l) {
         if (leftn->getValType() == VarType::DEFAULT) {
             left = std::move(leftn);
         }
         else {
-            if (leftn->getValType() == VarType::MATRIX) {/* error */}
+            if (leftn->getValType() == VarType::MATRIX) {d.errorStatic(l, "matrix type not support for testrep");}
             if (leftn->getValType() == VarType::CELL) {
                 TypeCaster tk(VarType::SIGNED, std::move(leftn));;
                 leftn = std::move(tk.cast());
@@ -46,13 +48,15 @@ public:
 class TestOnceNode: public Node {
     std::unique_ptr<VlueTypeNode> left;
     std::unique_ptr<Node> right;
+    Data &d;
+    yy::location loc;
 public:
-    TestOnceNode(std::unique_ptr<VlueTypeNode> leftn, std::unique_ptr<Node> rightn) : right(std::move(rightn)) {
+    TestOnceNode(std::unique_ptr<VlueTypeNode> leftn, std::unique_ptr<Node> rightn, Data &d, yy::location l) : right(std::move(rightn)), d(d), loc(l) {
         if (leftn->getValType() == VarType::DEFAULT) {
             left = std::move(leftn);
         }
         else {
-            if (leftn->getValType() == VarType::MATRIX) {/* error */}
+            if (leftn->getValType() == VarType::MATRIX) {d.errorStatic(l, "matrix type not support for testonce");}
             if (leftn->getValType() == VarType::CELL) {
                 TypeCaster tk(VarType::SIGNED, std::move(leftn));;
                 leftn = std::move(tk.cast());

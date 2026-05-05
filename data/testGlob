@@ -1,0 +1,30 @@
+
+signed b <-  5+ 6;
+
+func start() {
+ signed a <- 5;
+ printvar a;
+ printvar b;
+ signed b <- 6;
+ printvar b;
+ signed h <- call f();
+ printvar h;
+ call a();
+
+}
+
+
+signed c <- 6;
+
+func f() {
+    printvar c;
+    printvar b;
+    c <-c + b;
+    c;
+}
+
+
+func a() {
+  printvar c;
+  c;
+}

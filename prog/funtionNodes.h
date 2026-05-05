@@ -12,21 +12,22 @@ class CallFuncNode : public VlueTypeNode {
      std::vector<std::string> args;
      Data & d;
      VarType t;
+    yy::location loc;
 
 
      public:
-     CallFuncNode(std::string s, std::vector<std::string> argss, Data &dd) : name(std::move(s)), args(std::move(argss)), d(dd), t(VarType::DEFAULT) {}
-    CallFuncNode(std::string s, Data &dd) : name(std::move(s)), args(), d(dd), t(VarType::DEFAULT) {}
+     CallFuncNode(std::string s, std::vector<std::string> argss, Data &dd, yy::location l) : name(std::move(s)), args(std::move(argss)), d(dd), t(VarType::DEFAULT), loc(l) {}
+    CallFuncNode(std::string s, Data &dd, yy::location l) : name(std::move(s)), args(), d(dd), t(VarType::DEFAULT), loc(l) {}
 
      Value proc() override {
-          if (!d.fStore.contains(name)) throw std::runtime_error("Func:: name not found");
+          if (!d.fStore.contains(name)) throw std::runtime_error("Func:: name not found " + name + std::to_string(loc.begin.line));
           PARAMS p;
           for (auto s : args) {
               p.emplace_back( s,d.callStack.top().getValue(s));
           }
           Frame f(d.fStore[name].root.get(), d.fStore[name].params, d.varst.get());
           bool start = f.prepareToStart(p);
-          if (!start) {throw std::runtime_error("Func:: prepareToStart failed");}
+          if (!start) {throw std::runtime_error("Func:: prepareToStart failed "+ name + std::to_string(loc.begin.line));}
           d.callStack.emplace(f);
           auto fRes=  d.callStack.top().proc();
           d.callStack.pop();

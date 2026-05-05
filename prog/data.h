@@ -1,16 +1,17 @@
 #pragma once
 #include <algorithm>
 #include <iostream>
+#include <location.hh>
 #include <string>
 #include  <map>
 #include <memory>
 #include <stack>
 #include <variant>
 #include <vector>
-#include "parser.hpp"
 #include <unordered_map>
 #include "diffValues.h"
 #include "robot.h"
+#include "position.hh"
 
 class Node {
 public:
@@ -46,11 +47,11 @@ class Frame {
         for (auto it = ts.rbegin(); it != ts.rend(); ++it) {
             if (it->contains(varName)) {return (*it)[varName];}
         }
-         if (global->contains(varName)) {
+         if (global && global->contains(varName)) {
 
              return (*global)[varName];
          }
-         throw std::runtime_error("Variable name not found kakogo?");
+         throw std::runtime_error("Variable name not found kakogo? c" + varName);
     }
     void newPut(const std::string &name, SIT s) {
         (*ts.rbegin())[name] = std::move(s);
@@ -101,16 +102,21 @@ class Frame {
         std::vector<TSC> buildStorage;
         std::stack<Frame> callStack;
         std::unordered_map<std::string, Function> fStore;
-        Data(GameMap & m) : map(m) {}
-        SIT getBuildValue(std::string varName) {
+        std::vector<GameMap> screens;
+        int errorCounter = 0;
+
+        Data(GameMap & m) : map(m) {buildStorage.emplace_back(); varst = std::make_unique<TSC>();}
+        SIT getBuildValue(const std::string& varName, yy::location loc) {
             for (auto it = buildStorage.rbegin(); it != buildStorage.rend(); ++it) {
                 if (it->contains(varName)) {return (*it)[varName];}
             }
-            throw std::invalid_argument("Variable name not found" + varName);
+            errorStatic(loc,"Variable name not found: " + varName);
+            return {std::monostate()};
         }
         void addBuildParams(PARAMS pr) {
             for (auto &a : pr) {
                 buildStorage.back().emplace(a);
+
             }
         }
         bool chekIsExist(std::string varName) {
@@ -123,6 +129,10 @@ class Frame {
             if (!fStore.contains("start")) throw std::invalid_argument("start not found");
             callStack.emplace(fStore["start"].root.get(),fStore["start"].params,  varst.get());
             callStack.top().root->proc();
+        }
+        void errorStatic(const yy::location& l, const std::string &msg) {
+            errorCounter += 1;
+            std::cerr << msg << " at line: " << l << std::endl;
         }
         Data() = default;
 

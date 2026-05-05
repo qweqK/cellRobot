@@ -16,8 +16,9 @@ public:
     std::string id;
     Data &varst;
     VarType t;
-    VarNode(std::string & str, Data &varstr ) : id(std::move(str)), varst(varstr) {
-            auto a = varst.getBuildValue(id);
+    yy::location loc;
+    VarNode(std::string & str, Data &varstr,yy::location l ) : id(std::move(str)), varst(varstr), loc(l) {
+            auto a = varst.getBuildValue(id, loc);
             t = a.value.type;
     }
 
@@ -40,7 +41,7 @@ public:
             case VarType::SIGNED:  std::cout<< std::get<int>(value.s); break;
             case VarType::UNSIGNED : std::cout << std::get<unsigned int>(value.s); break;
             case VarType::CELL: std::cout << std::get<Cell>(value.s); break;
-                //case VarType::MATRIX: std::cout << std::get<Matrix>(value.s); break;
+           // case VarType::MATRIX: std::cout << std::get<Matrix>(value.s); break;
         }
     }
     LiterNode(Value  value, VarType tt) : value(std::move(value)), t(tt)  {}
@@ -61,7 +62,7 @@ public:
 
 
 class EmptyNode : public Node {
-    Value proc() override {return 0;}
+    Value proc() override {return std::monostate();}
     void print() override {std::cout << "null" << std::endl;}
 };
 

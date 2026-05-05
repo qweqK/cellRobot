@@ -1,0 +1,63 @@
+
+const cell rC <- (right);
+const cell lC <- (left);
+const cell tC <- (top);
+const cell dC <- (down);
+
+func start() {
+    signed sh <- 10;
+    printscr;
+    testrep(sh>0) {
+        matrix cell r;
+        r <- #xray;
+        cell t;
+        t<- r(3,3);
+        signed rT <- t * rC;
+        testonce(rT = 0) {
+            right;
+            printscr;
+        }
+        testonce(rT = 1) {
+            signed lT <- t * lC;
+            testonce(lT = 0) {
+                left;
+                printscr;
+
+            }
+            testonce(lT = 1) {
+                signed tT <- t * tC;
+                testonce(tT = 0) {
+                    top;
+                    printscr;
+                }
+                testonce(tT = 1) {
+                    signed dT <- t * dC;
+                     testonce(dT = 0) {
+                        bottom;
+                        printscr;
+                     }
+                }
+            }
+        }
+        sh <- sh -1;
+    }
+}
+
+
+
+func extendLeft() {
+;
+}
+func extendRight() {
+
+;
+}
+
+func extendDown() {
+;
+
+}
+
+func extendTop() {
+;
+}

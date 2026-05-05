@@ -14,12 +14,19 @@ FetchContent_Declare(
         GIT_TAG v3.11.3
 )
 FetchContent_MakeAvailable(json)
+FetchContent_Declare(
+        sfml
+        GIT_REPOSITORY https://github.com/SFML/SFML.git
+        GIT_TAG 2.6.1
+)
+FetchContent_MakeAvailable(sfml)
 
 BISON_TARGET(mParser parser.y ./parser.cpp DEFINES_FILE ./parser.hpp)
 FLEX_TARGET(mLexer lexer.l ./lexer.cpp )
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(../visualiser)
 add_executable(lab main.cpp ${BISON_mParser_OUTPUTS} ${FLEX_mLexer_OUTPUTS}
         game.cpp
         game.h
@@ -36,7 +43,13 @@ add_executable(lab main.cpp ${BISON_mParser_OUTPUTS} ${FLEX_mLexer_OUTPUTS}
         robot.cpp
         )
 
-target_link_libraries(lab PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(lab PRIVATE
+        nlohmann_json::nlohmann_json
+        visual
+        sfml-graphics
+        sfml-window
+        sfml-system
+)
 
 #add_executable(lab main.cpp parser.cpp parser.hpp lex.yy.c)
 

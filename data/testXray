@@ -1,0 +1,17 @@
+
+func start() {
+    matrix cell t;
+    matrix cell t2;
+    t <- xray;
+    printmap;
+    printvar t;
+    right;
+    right;
+    right;
+    right;
+    bottom;
+    t2 <- xray;
+    printmap;
+    printvar t2;
+
+}

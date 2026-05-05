@@ -1,0 +1,73 @@
+
+
+func start() {
+    matrix signed sum;
+    matrix signed mul;
+    sum <- call matrixSum();
+    mul <- call matrixMul();
+    printvar sum;
+    printvar mul;
+
+}
+
+
+
+func matrixSum() {
+    matrix signed f(5, 4);
+    matrix signed s(4,5);
+    signed  a <- 0;
+    testrep(a < 4) {
+    signed b <- 3;
+        testrep(b > -1) {
+            f(a, b) <- b;
+            b <- b-1;
+        }
+        a <- a+1;
+    }
+    signed r1 <- 0;
+
+    testrep(r1<4) {
+        signed c <- 0;
+        testrep(c < 5) {
+            s(r1, c) <- c;
+            c <- c + 1;
+            }
+            r1 <- r1+1;
+       }
+    printvar f;
+    printvar s;
+    f <- f+s;
+    f;
+}
+
+
+
+func matrixMul() {
+    matrix signed f(5, 4);
+    matrix signed s(4,5);
+    signed  a <- 0;
+    testrep(a < 4) {
+    signed b <- 3;
+        testrep(b > -1) {
+            f(a, b) <- b;
+            b <- b-1;
+        }
+        a <- a+1;
+    }
+    signed r1 <- 0;
+
+    testrep(r1<4) {
+        signed c <- 0;
+        testrep(c < 5) {
+            s(r1, c) <- c;
+            c <- c + 1;
+            }
+            r1 <- r1+1;
+       }
+    printvar f;
+    printvar s;
+    f <- f*s;
+    f;
+}
+
+

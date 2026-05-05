@@ -1,0 +1,42 @@
+
+func start() {
+    signed s <- 5;
+    printmap;
+    printscr;
+    right;
+    printscr;
+    printmap;
+    matrix cell f;
+    f <- xray;
+    printvar f;
+    right;
+    printscr;
+    iswin;
+    bottom;
+    printscr;
+    bottom;
+    printscr;
+    bottom;
+    printscr;
+    f <- xray;
+    printvar f;
+    printscr;
+    signed d <- 10;
+    testrep(d > 0) {
+        right;
+       printscr;
+        printmap;
+        bottom;
+        printscr;
+        printmap;
+        left;
+        printscr;
+        printmap;
+        top;
+        printscr;
+        printmap;
+        d <- d-1;
+
+    }
+    printmap;
+}

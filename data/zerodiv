@@ -1,0 +1,12 @@
+
+
+func start() {
+    signed a <- 5;
+    signed b <- 0;
+    signed c <- a/b;
+    printvar c;
+    unsigned d <- 5;
+    signed e <- -2;
+    signed f <- e + d;
+    printvar f;
+}

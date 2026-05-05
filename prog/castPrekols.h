@@ -17,7 +17,7 @@ class SignedToUnsign : public VlueTypeNode {
     void print() override{ std::cout << "STU("; next->print(); std::cout << ")";}
     Value proc() override {
         auto r = std::get<int>(next->proc().s);
-        if (r<0)/*osibka*/ return 0;
+        if (r<0) throw std::runtime_error(" it <0");
         unsigned int nr = static_cast<unsigned int>(r);
         return nr;
     }
@@ -37,7 +37,6 @@ class UnsignToSigned : public VlueTypeNode {
     void print() override{ std::cout << "UTS("; next->print(); std::cout << ")";}
     Value proc() override {
         auto r = std::get<unsigned int>(next->proc().s);
-        // проверка, что многа
         int nr = static_cast<int>(r);
         return nr;
     }
