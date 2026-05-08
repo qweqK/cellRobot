@@ -1,18 +1,18 @@
 {
    "rows": 8,
-   "cols": 6,
-   "exitX": 3,
-   "exitY": 4,
+   "cols": 12,
+   "exitX": 6,
+   "exitY": 0,
    "rXpos": 0,
    "rYpos": 0,
    "grid": [
-    [false, true, true, false], [true, false, false, false], [false, true, true, false], [false, false, false, false], [false, false, false, false], [false, false, false, false],
-    [false, false, true, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false],
-    [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false],
-    [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false],
-    [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false],
-    [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false],
-    [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false],
-    [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false]
+    [false, true, true, false], [true, false, false, false], [false, true, true, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, true, true, false], [true, false, false, false], [false, true, true, false], [false, false, false, false], [false, false, false, false], [false, false, false, false],
+    [false, false, true, true], [false, false, true, false], [false, false, false, false], [false, false, true, true], [false, false, false, false], [false, false, false, false], [false, false, true, false], [false, false, true, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false],
+    [false, false, false, true], [false, false, true, true], [false, false, false, false], [false, false, true, true], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, true, true, false], [false, false, true, false], [false, false, false, false], [false, false, false, false], [false, false, false, false],
+    [false, false, false, true], [false, true, true, true], [false, false, false, false], [false, false, true, true], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, true, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false],
+    [false, false, false, false], [false, false, false, true], [false, false, false, false], [false, true, true, true], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false],
+    [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false],
+    [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, true, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false],
+    [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, true, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false], [false, false, false, false]
     ]
 }

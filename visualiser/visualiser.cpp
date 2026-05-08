@@ -19,8 +19,10 @@ void Visualiser::loadTexture(const std::string &path) {
     textures["1101"].loadFromFile(path + "1101.png");
     textures["1110"].loadFromFile(path + "1110.png");
     textures["1111"].loadFromFile(path + "1111.png");
-    textures["robot"].loadFromFile(path + "robot.png");
-    textures["exit"].loadFromFile(path + "exit.png");
+  //  textures["robot"].loadFromFile(path + "robot.png");
+   // textures["exit"].loadFromFile(path + "exit.png");
+    textures["robot"].loadFromFile(path + "art.jpg");
+    textures["exit"].loadFromFile(path + "nast.jpg");
 
 
 }
@@ -79,8 +81,8 @@ void Visualiser::loadSprite() {
     sprites["robot"].setOrigin({sprites["robot"].getLocalBounds().width/2.f, sprites["robot"].getLocalBounds().height/2.f});
 
     sprites["exit"].setTexture(textures["exit"]);
-    sprites["exit"].scale({titleSize/sprites["exit"].getGlobalBounds().width, titleSize/sprites["exit"].getGlobalBounds().height});
-
+    sprites["exit"].scale({titleSize/sprites["exit"].getGlobalBounds().width/1.5f, titleSize/sprites["exit"].getGlobalBounds().height/1.5f});
+    sprites["exit"].setOrigin({sprites["exit"].getLocalBounds().width/2.f, sprites["exit"].getLocalBounds().height/2.f});
 
 }
 
@@ -109,6 +111,8 @@ void Visualiser::drawMap(Matrix &map, int rows, int cols) {
                 else st += '0';
             }
             s = sprites[st];
+            if (marked[{j,i}] == 1) { s.setColor(sf::Color::Yellow);}
+            else if (marked[{j, i}] == 2) {s.setColor(sf::Color::Red);}
             s.setPosition(sf::Vector2f(j*titleSize, i * titleSize));
             window.draw(s);
         }
@@ -117,9 +121,9 @@ void Visualiser::drawMap(Matrix &map, int rows, int cols) {
 
 
 
-void Visualiser::drawExit(int row, int col) {
+void Visualiser::drawExit(int x, int y) {
     sf::Sprite s = sprites["exit"];
-    s.setPosition(sf::Vector2f(col * titleSize, row * titleSize));
+    s.setPosition(sf::Vector2f(x * titleSize + titleSize/2.f, y * titleSize + titleSize/2.f));
     window.draw(s);
 }
 
@@ -128,5 +132,8 @@ void Visualiser::drawExit(int row, int col) {
 void Visualiser::drawRobot(int x, int y) {
     sf::Sprite s = sprites["robot"];
     s.setPosition(sf::Vector2f(x * titleSize + titleSize/2.f, y * titleSize + titleSize/2.f));
+    if (lastPosRob.first != x && lastPosRob.second != y) {
+        marked[{x,y}] += 1;
+    }
     window.draw(s);
 }

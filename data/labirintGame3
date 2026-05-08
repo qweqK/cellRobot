@@ -1,0 +1,301 @@
+const cell rC <- (right);
+const cell lC <- (left);
+const cell tC <- (top);
+const cell dC <- (down);
+signed col <- 5;
+signed row <- 5;
+matrix signed locMap;
+signed steps <- 0;
+signed cX<-0;
+signed cY<-0;
+signed ot1 <- 0;
+signed ot2 <- 1;
+signed ot3 <- 2;
+func start() {
+   matrix signed m (row, col);
+   locMap <- m;
+   printscr;
+   matrix cell x;
+   x <- #xray;
+   signed check;
+   check <- x(2, 2) * tC;
+    testonce(check = 0) {
+        testonce( (cY -1) < 0) {call extendTop();}
+        testonce(locMap(cY-1, cX) = 0) {
+         locMap(cY-1, cX) <- 1;
+             cY <- cY -1;
+             signed nd <- 1;
+             top; printscr;
+             call DFS(nd);
+            }
+        }
+        check <- x(2, 2) * dC;
+        testonce(check = 0) {
+            testonce( (cY +1)= row) {call extendDown();}
+            testonce( (cY +1)> row) {call extendDown();}
+            testonce(locMap(cY+1, cX) = 0) {
+                locMap(cY+1, cX) <- 1;
+                cY <- cY +1;
+                signed nd <- 0;
+                bottom; printscr;
+                call DFS(nd);
+            }
+        }
+
+        check <- x(2, 2) * lC;
+        testonce(check = 0) {
+            testonce( (cX -1) < 0) {call extendLeft();}
+            testonce(locMap(cY, cX-1) = 0) {
+                locMap(cY, cX-1) <- 1;
+                cX <- cX -1;
+                signed nd <- 3;
+                left; printscr;
+                call DFS(nd);
+            }
+        }
+        check <- x(2, 2) * rC;
+        testonce(check = 0) {
+           testonce( (cX +1)= col) {call extendRight();}
+           testonce( (cX +1)> col) {call extendRight();}
+           testonce(locMap(cY, cX +1) = 0) {
+               locMap(cY, cX +1) <- 1;
+               cX <- cX +1;
+               signed nd <- 2;
+               right; printscr;
+               call DFS(nd);
+            }
+        }
+}
+
+
+
+
+
+func DFS(signed dir) {
+    printvar dir;
+    iswin;
+    matrix cell x;
+    x <- #xray;
+    signed check;
+    testonce((dir = 0) =0)  {
+        check <- x(2, 2) * tC;
+        testonce(check = 0) {
+            testonce( (cY -1) < 0) {call extendTop();}
+            testonce(locMap(cY-1, cX) = 0) {
+                locMap(cY-1, cX) <- 1;
+                cY <- cY -1;
+                signed nd <- 1;
+                top; printscr;
+                call DFS(nd);
+            }
+        }
+    }
+    testonce((dir = 1) =0)  {
+        check <- x(2, 2) * dC;
+        testonce(check = 0) {
+            testonce( (cY +1)= row) {call extendDown();}
+            testonce( (cY +1)> row) {call extendDown();}
+            testonce(locMap(cY+1, cX) = 0) {
+                locMap(cY+1, cX) <- 1;
+                cY <- cY +1;
+                signed nd <- 0;
+                bottom; printscr;
+                call DFS(nd);
+            }
+        }
+    }
+    testonce((dir = 2) =0)  {
+        check <- x(2, 2) * lC;
+        testonce(check = 0) {
+            testonce( (cX -1) < 0) {call extendLeft();}
+            testonce(locMap(cY, cX-1) = 0) {
+                locMap(cY, cX-1) <- 1;
+                cX <- cX -1;
+                signed nd <- 3;
+                left; printscr;
+                call DFS(nd);
+            }
+
+        }
+    }
+    testonce((dir = 3) =0)  {
+        check <- x(2, 2) * rC;
+        testonce(check = 0) {
+            testonce( (cX +1)= col) {call extendRight();}
+            testonce( (cX +1)> col) {call extendRight();}
+            testonce(locMap(cY, cX+1) = 0) {
+                locMap(cY, cX+1) <- 1;
+                cX <- cX +1;
+                signed nd <- 2;
+                right; printscr;
+                call DFS(nd);
+            }
+        }
+    }
+    testonce(dir = 0) { top; printscr; cY <- cY -1;}
+    testonce(dir = 1) { bottom; printscr; cY <- cY +1;}
+    testonce(dir = 2) { left; printscr; cX <- cX -1;}
+    testonce(dir = 3) { right; printscr; cX <- cX +1;}
+    printvar ot1;
+
+}
+
+
+func extendLeft() {
+      signed newCol <- col+10;
+      matrix signed newMap(row, newCol);
+      signed y <- 0;
+      testrep(y < row) {
+          signed x <- 0;
+          signed xx <- 10;
+          testrep(x < 10){
+              printvar y;
+              newMap(y, x) <- 0;
+              x <- x+1;
+          }
+          x <- 0;
+          testrep(xx<newCol) {
+              newMap(y,xx) <- locMap(y,x);
+              xx <- xx +1;
+              x <- x+1;
+          }
+          y <- y +1;
+      }
+      col <-newCol;
+      printvar locMap;
+      printvar newMap;
+      locMap <- newMap;
+      cX <- cX+10;
+}
+
+func extendRight() {
+       signed newCol <- col+10;
+       matrix signed newMap(row, newCol);
+       signed y <- 0;
+       testrep(y < row) {
+           signed x <- 0;
+           signed xx <- col;
+           testrep(x < col){
+               printvar y;
+               newMap(y, x) <- locMap(y,x);
+               x <- x+1;
+           }
+           testrep(xx<newCol) {
+               newMap(y,xx) <- 0;
+               xx <- xx +1;
+           }
+           y <- y +1;
+       }
+       col <- newCol;
+       printvar locMap;
+       printvar newMap;
+       locMap <- newMap;
+}
+
+func extendDown() {
+  signed newRow <- row+10;
+      matrix signed newMap(newRow, col);
+      signed y <- 0;
+      testrep(y < row) {
+          signed x <- 0;
+          testrep(x < col){
+              printvar y;
+              newMap(y, x) <- locMap(y, x);
+              x <- x+1;
+          }
+          y <- y +1;
+      }
+      y <- 0;
+      signed yy <- row;
+      testrep(yy < newRow) {
+          signed x <- 0;
+          testrep(x < col) {
+            newMap(yy, x) <- 0;
+            x <- x+1;
+          }
+          yy <- yy +1;
+      }
+      row <- newRow;
+      printvar locMap;
+      printvar newMap;
+      locMap <- newMap;
+
+}
+
+func extendTop() {
+      signed newRow <- row+10;
+      matrix signed newMap(newRow, col);
+      signed y <- 0;
+      testrep(y < 10) {
+          signed x <- 0;
+          testrep(x < col){
+              printvar y;
+              newMap(y, x) <- 0;
+              x <- x+1;
+          }
+          y <- y +1;
+      }
+      y <- 0;
+      signed yy <- 10;
+      testrep(y < row) {
+          signed x <- 0;
+          testrep(x < col) {
+            newMap(yy, x) <- locMap(y, x);
+            x <- x+1;
+          }
+          y <- y +1;
+          yy <- yy +1;
+      }
+      row <- newRow;
+      printvar locMap;
+      printvar newMap;
+      locMap <- newMap;
+      cY <- cY +10;
+
+}
+
+
+func isFork(cell c) {
+    signed res <- 0;
+    signed ch <- c*lC;
+    testonce(ch = 0) {
+        res <- res+1;
+    }
+    ch <- c*rC;
+    testonce(ch= 0) {
+        res <- res+1;
+    }
+    ch <- c*dC;
+    testonce(ch = 0) {
+        res <- res+1;
+    }
+    ch <- c*tC;
+    testonce(ch= 0) {
+       res <- res+1;
+    }
+    res > 2;
+}
+
+
+func deadEnd(cell c) {
+    signed res <- 0;
+    printvar c;
+    signed ch <- c*lC; printvar ch;
+    testonce(ch = 1) {
+        res <- res+1;
+    }
+    ch <- c*rC; printvar ch;
+    testonce(ch= 1) {
+        res <- res+1;
+    }
+    ch <- c*dC; printvar ch;
+    testonce(ch = 1) {
+        res <- res+1;
+    }
+    ch <- c*tC; printvar ch;
+    testonce(ch= 1) {
+       res <- res+1;
+    }
+    printvar res;
+    res > 2;
+}

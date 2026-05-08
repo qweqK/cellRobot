@@ -19,10 +19,19 @@ void Game::run() {
         catch (std::exception& e) {
             std::cerr << "catch error: " << e.what() << std::endl;
         }
-        sf::RenderWindow window(sf::VideoMode(960, 640), "TD");
+        size_t titlesize = 32;
+        size_t heiht = gameMap.rows * titlesize;
+        size_t width = gameMap.cols * titlesize;
+        while (heiht > 1080 || width > 1920) {
+            titlesize/=2;
+            heiht = gameMap.rows * titlesize;
+            width = gameMap.cols * titlesize;
+        }
+        std::cout << titlesize << std::endl;
+        sf::RenderWindow window(sf::VideoMode(width, heiht), "TD");
         window.setPosition({0,0});
         window.setFramerateLimit(60);
-        visualiser = std::make_unique<Visualiser>(64.0f, window);
+        visualiser = std::make_unique<Visualiser>(titlesize, window);
         visualiser->loadTexture(pathGaphic);
         visualiser->loadSprite();
         visualiser->draw(data.screens);

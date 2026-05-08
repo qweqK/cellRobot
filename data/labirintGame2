@@ -15,7 +15,7 @@ func start() {
     locMap <- m;
     printscr;
     signed sh <-0;
-    testrep(sh < 10000) {
+    testrep(sh < 100) {
         iswin;
         matrix cell r;
         r <- #xray;
@@ -30,7 +30,10 @@ func start() {
                 testonce( (cX +1)= col) {call extendRight();}
                 testonce( (cX +1)> col) {call extendRight();}
                 testonce(locMap(cY, cX + 1) =0) {
+                    signed dead <- call deadEnd(t);
+                    testonce(dead=1) {locMap(cY, cX) <- locMap(cY, cX) + 1;}
                     locMap(cY, cX) <- locMap(cY, cX) + 1;
+                    testonce(dead = 0)
                     printmap; right; printscr;
                     cX <- cX +1;
                     isMov <- 1;
@@ -43,6 +46,8 @@ func start() {
             testonce(isMov = 0) {
                 testonce( (cX -1)<0) {call extendLeft();}
                 testonce(locMap(cY, cX - 1) = 0) {
+                signed dead <- call deadEnd(t);
+                 testonce(dead=1) {locMap(cY, cX) <- locMap(cY, cX) + 1;}
                    locMap(cY, cX) <- locMap(cY, cX) + 1;
                    printmap; left; printscr;
                    cX <- cX -1;
@@ -56,10 +61,12 @@ func start() {
             testonce(isMov = 0) {
                 testonce( (cY -1) < 0) {call extendTop();}
                 testonce(locMap(cY -1, cX) =0) {
-                     locMap(cY, cX) <- locMap(cY, cX) + 1;
-                     printmap; top; printscr;
-                     cY <- cY - 1;
-                     isMov <- 1;
+                signed dead <- call deadEnd(t);
+                testonce(dead=1) {locMap(cY, cX) <- locMap(cY, cX) + 1;}
+                locMap(cY, cX) <- locMap(cY, cX) + 1;
+                printmap; top; printscr;
+                cY <- cY - 1;
+                isMov <- 1;
                 }
             }
         }
@@ -69,7 +76,11 @@ func start() {
             testonce(isMov = 0) {
                 testonce( (cY +1)= row) {call extendDown();}
                 testonce( (cY +1)> row) {call extendDown();}
+                printvar col;
+                printvar row;
                 testonce(locMap(cY +1 , cX) =0) {
+                     signed dead <- call deadEnd(t);
+                     testonce(dead=1) {locMap(cY, cX) <- locMap(cY, cX) + 1;}
                      locMap(cY, cX) <- locMap(cY, cX) + 1;
                      printmap; bottom; printscr;
                      cY <- cY +1;
@@ -79,16 +90,19 @@ func start() {
         }
 
         testonce(isMov = 0) {
+
             check <- t * rC;
             testonce(check = 0) {
                 testonce(isMov = 0) {
                     testonce( (cX +1)= col) {call extendRight();}
                     testonce( (cX +1)> col) {call extendRight();}
                     testonce(locMap(cY, cX + 1) =1) {
-                        //signed fork <- call isFork(t);
-                       // testonce(fork = 0) {
+                         signed dead <- call deadEnd(t);
+                         testonce(dead=1) {locMap(cY, cX) <- locMap(cY, cX) + 1;}
+                        signed fork <- call isFork(t);
+                       testonce(fork = 0) {
                         locMap(cY, cX) <- locMap(cY, cX) + 1;
-                        //}
+                        }
                         printmap; right; printscr;
                         cX <- cX +1;
                         isMov <- 1;
@@ -101,10 +115,12 @@ func start() {
                 testonce(isMov = 0) {
                     testonce( (cX -1)<0) {call extendLeft();}
                     testonce(locMap(cY, cX - 1) = 1) {
-                       //signed fork <- call isFork(t);
-                       //testonce(fork = 0) {
+                       signed dead <- call deadEnd(t);
+                       testonce(dead=1) {locMap(cY, cX) <- locMap(cY, cX) + 1;}
+                       signed fork <- call isFork(t);
+                       testonce(fork = 0) {
                        locMap(cY, cX) <- locMap(cY, cX) + 1;
-                       //}
+                       }
                        printmap; left; printscr;
                        cX <- cX -1;
                        isMov <- 1;
@@ -117,10 +133,12 @@ func start() {
                testonce(isMov = 0) {
                    testonce( (cY -1) < 0) {call extendTop();}
                    testonce(locMap(cY -1, cX) =1) {
-                       //signed fork <- call isFork(t);
-                       //testonce(fork = 0) {
+                       signed dead <- call deadEnd(t);
+                       testonce(dead=1) {locMap(cY, cX) <- locMap(cY, cX) + 1;}
+                       signed fork <- call isFork(t);
+                       testonce(fork = 0) {
                        locMap(cY, cX) <- locMap(cY, cX) + 1;
-                       //}
+                       }
                        printmap; top; printscr;
                        cY <- cY - 1;
                        isMov <- 1;
@@ -134,10 +152,12 @@ func start() {
                     testonce( (cY +1)= row) {call extendDown();}
                     testonce( (cY +1)> row) {call extendDown();}
                     testonce(locMap(cY +1 , cX) =1) {
-                    //signed fork <- call isFork(t);
-                    //testonce(fork = 0) {
+                    signed dead <- call deadEnd(t);
+                    testonce(dead=1) {locMap(cY, cX) <- locMap(cY, cX) + 1;}
+                    signed fork <- call isFork(t);
+                    testonce(fork = 0) {
                     locMap(cY, cX) <- locMap(cY, cX) + 1;
-                    //}
+                    }
                         printmap; bottom; printscr;
                         cY <- cY +1;
                         isMov <- 1;
@@ -229,6 +249,8 @@ func extendDown() {
       row <- newRow;
       printvar locMap;
       printvar newMap;
+      locMap <- newMap;
+
 }
 
 func extendTop() {
@@ -285,3 +307,26 @@ func isFork(cell c) {
     res > 2;
 }
 
+
+func deadEnd(cell c) {
+    signed res <- 0;
+    printvar c;
+    signed ch <- c*lC; printvar ch;
+    testonce(ch = 1) {
+        res <- res+1;
+    }
+    ch <- c*rC; printvar ch;
+    testonce(ch= 1) {
+        res <- res+1;
+    }
+    ch <- c*dC; printvar ch;
+    testonce(ch = 1) {
+        res <- res+1;
+    }
+    ch <- c*tC; printvar ch;
+    testonce(ch= 1) {
+       res <- res+1;
+    }
+    printvar res;
+    res > 2;
+}

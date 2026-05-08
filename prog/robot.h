@@ -24,12 +24,19 @@ public:
             exitY  = j["exitY"].get<int>();
             rX = j["rXpos"].get<int>();
             rY = j["rYpos"].get<int>();
-            auto gridd = j["grid"].get<std::vector<std::vector<bool>>>();
+            auto gridd = j["grid"].get<std::vector<std::string>>();
             grid = Matrix(VarType::CELL, rows, cols);
             for (int i = 0; i < rows; i++) {
                 for (int j = 0; j < cols; j++) {
                     auto c = gridd[i * cols + j];
-                    grid(i, j).emplace<Cell>(c[0], c[1], c[2], c[3]);
+                    bool br[4] = {false, false, false, false};
+                    for (auto s : c) {
+                        if (s == 't') br[0] = true;
+                        else if (s == 'd') br[1] = true;
+                        else if (s == 'l') br[2] = true;
+                        else if (s == 'r') br[3] = true;
+                    }
+                    grid(i, j).emplace<Cell>(br[0], br[1], br[2], br[3]);
                 }
             }
         }
