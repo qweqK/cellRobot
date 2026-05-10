@@ -96,7 +96,7 @@ void Visualiser::draw(std::vector<GameMap> &screens) {
         drawExit(map.exitX, map.exitY);
         drawRobot(map.rX,map.rY);
         window.display();
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(3000));
     }
 
 }
